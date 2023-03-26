@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"license": "AGPL-3.0",
 	"scripts": {
-		"build": "node node_modules/frame.libx.js/build/webBundler.js --src=\"src\" --minify && yarn build:standalone",
+		"build": "node node_modules/frame.libx.js/build/webBundler.js --src=\"src\" --minify",
 		"watch": "node node_modules/frame.libx.js/build/webBundler.js --src='src' --watch --serve",
 		"serve": "node build.js --serve",
 		"serve:log": "yarn start >> log.txt",
