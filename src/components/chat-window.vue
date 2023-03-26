@@ -1,0 +1,264 @@
+<template lang="pug">
+div
+	div.box-info(v-if="showInfo && bot != null", v-cloak)
+		.layout-gt-xs-row.layout-align-space-between-end
+			div
+				h2 "{{ bot.name }}" Bot
+				p.box-info-desc {{ bot.desc }}
+			div 
+
+	div.box-messages
+		.box-messages-item(v-for="(msg, i) of messages")
+			div(v-if="!renderHtml")
+				editable.box-messages-item-content(:class="msg.role == 'user' ? 'message-bot' : 'message-user'",contenteditable="true",v-model="msg.content") 
+			div(v-else)
+				.box-messages-item-content.output-html(:class="msg.role == 'user' ? 'message-bot' : 'message-user'", v-html="makeHtml(msg.content)")
+
+			.box-messages-item-hover.layout-column
+				.icon.btn-sqr.message-replay(label='replay from here', @click="replay(msg, i)", :disabled="isActive").pointer
+					i.fas.fa-redo
+				.icon.btn-sqr.message-speak(v-if="!isSpeaking", label='read out loud this message', @click="speak(msg.content)").pointer
+					i.fas.fa-volume-up
+				.icon.btn-sqr.message-speak(v-if="isSpeaking", label='stop read out loud', @click="stopSpeak()").pointer
+					i.fas.fa-volume-mute
+
+	form(@submit.prevent="submit", :disabled="isLoading").layout-row
+		.field.margin-bottom0
+			b-dropdown.is-pulled-right(v-if="showMore", aria-role='list', position='is-top-right').chat-control.pointer.fg-grayLighter.bg-dark.margin-right20
+				template(#trigger='')
+					b-icon(icon='ellipsis-v')
+				b-dropdown-item(aria-role='listitem', @click="$emit('update:renderHtml', !renderHtml)") 
+					span.margin-right10.fas(:class="{ 'fa-square': !renderHtml, 'fa-check-square': renderHtml }")
+					span Render HTML
+				b-dropdown-item(aria-role='listitem', @click="reset()") Reset
+		.field.flex.padding-right20.margin-bottom0
+			.control
+				textarea.user-input(v-model='userMessage', type="text", ref="input", :rows="inputHeight", placeholder="Ask a question here").chat-control.x-font
+		.field.form-group.margin-bottom0
+			.control
+				button.btn-submit(label='Save', type='submit', role='button', :disabled="isActive").bg-dark.fg-grayLighter.bigger.chat-control
+					.icon
+						i.fab.fa-telegram-plane
+
+	.related-chunks(v-if="relatedChunks?.length > 0")
+		h2 Related Sources:
+		.chunk(v-for="chunk in relatedChunks") 
+			h4 {{ chunk.title }}
+			pre {{ chunk.text }}
+
+	b-loading(:is-full-page='true', :active.sync='isLoading', :can-cancel='false')
+</template>
+
+<script lang="ts">
+import { libx, ProxyCache } from '/frame/scripts/ts/browserified/frame.js';
+import { showdown, hotkeys } from '/scripts/ts/browserified/libs.js';
+import helpers from '/scripts/ts/app/app.helpers.js';
+import { OpenAI } from '/scripts/ts/modules/OpenAI.js';
+import { IConvMessage } from '../scripts/ts/types/IConvMessage';
+
+var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
+let cacheMgr = <ProxyCache>null;
+
+export default {
+	async created() {
+
+	},
+	async mounted() {
+		hotkeys.filter = (event:any) => (event.target || event.srcElement)?.tagName == 'TEXTAREA' ? true : false;
+		hotkeys('ctrl+enter, command+enter, enter', (event, handler)=>{
+			const isEnter = handler.key == 'enter';
+			libx.log.v('ctrl-enter pressed, submitting...');
+			if (isEnter && this.inputHeight > 1) return;
+			this.submit({ isReplay: false });
+			return false;
+		});
+
+		this.isLoading = false;
+
+		cacheMgr = new ProxyCache(`ai-chat-${this.botId}`, {});
+		this.messages = cacheMgr._cache.get('messages');
+		if (this.messages?.length == null || this.messages?.length == 0) {
+			this.reset();
+		}
+
+		setTimeout(this.scrollChatToBottom, 3000);
+	},
+	async destroyed() {
+		console.log('destroyed')
+		hotkeys.unbind();
+	},
+	props: {
+		botId: String,
+		docsIds: Array,
+		config: {},
+		showInfo: Boolean,
+		showMore: {
+			type: Boolean,
+			default: true,
+		},
+		renderHtml: {
+			type: Boolean,
+			default: false,
+		},
+		autoSpeak: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	data() {
+		return {
+			openAI: new OpenAI(),
+			messages: [],
+			userMessage: null,
+			isLoading: true,
+			bot: null,
+			isSpeaking: false,
+			relatedChunks: [],
+			isActive: false,
+			isNewModel: false,
+		};
+	},
+	methods: {
+		toggleProp(toggleName) {
+			this.$emit('update:' + toggleName, !this[toggleName]);
+		},
+		reset() {
+			this.messages = <IConvMessage[]>[
+				// { role: "assistant", content: "Hey, how can I help you today?", },
+			];
+			this.userMessage = this.config?.defaultInput ?? this.bot?.defaultInput;
+		},
+		async submit({isReplay=false}) {
+			if (this.isActive) return;
+			const msg = this.userMessage;
+			console.log('submit: ', msg);
+
+			this.isLoading = true; this.$forceUpdate();
+
+			let newResponse = null;
+			
+			try{
+				const config = { 
+					frequency_penalty: this.bot?.frequency_penalty,
+					presence_penalty: this.bot?.presence_penalty,
+					temperature: this.bot?.temperature,
+					user: app.userManager?.data?.public?.id,
+					...this.config,
+				};
+				delete config.priming; // openai api doesn't like it there.
+				delete config.defaultInput; // openai api doesn't like it there.
+				if (this.bot?.model != null) {
+					config.model = this.bot?.model;
+				}else if (this.isNewModel) {
+					config.model = 'gpt-4-0314';
+				}
+
+				const newUserMsg = <IConvMessage>{ role: 'user', content: msg };
+				const messages = [...this.messages];
+				if (!isReplay) messages.push(newUserMsg);
+
+				if (!isReplay) {
+					this.userMessage = '';
+					this.messages.push(newUserMsg)
+				}
+				
+				const newMsg = {role:'assistant', content: ''};
+				this.messages.push(newMsg);
+				this.scrollChatToBottom();
+
+				const priming = this.config?.priming ?? this.bot?.priming;
+				newResponse = await this.openAI.createChatCompletionStream(messages, config, priming, (delta)=>{
+					this.isLoading = false;
+					newMsg.content += delta;
+					this.scrollChatToBottom(true);
+				});
+				this.$forceUpdate();
+				
+				this.messages.push(this.messages.pop()); // so it'll be stored properly in cache
+				// newText = newMsg.content;
+			} catch(err) {
+				let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error || err?.message);
+
+				helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
+				this.isLoading = false; this.$forceUpdate();
+				console.error(err);
+			}
+		},
+		scrollChatToBottom(gentle=false) {
+			setTimeout(()=>{
+				var myDiv = document.getElementsByClassName('box-messages')?.[0];
+				if (myDiv == null) return;
+
+				const isAtBottom = (myDiv.scrollHeight - myDiv.scrollTop) - myDiv.clientHeight <= 80;
+				if (gentle && !isAtBottom) return;
+
+				// if (myDiv.scrollTop - (myDiv.scrollHeight - myDiv.clientHeight) > -3) return;
+				myDiv.scrollTop = myDiv.scrollHeight;
+			},10);
+		},
+		makeHtml(input) {
+			return conv.makeHtml(input);
+		},
+		async replay(msg, i) {
+			console.log('replay: ', msg, i);
+			this.messages.splice(i+1);
+			this.$forceUpdate();
+
+			const last = this.messages.last();
+			if (last.role == 'assistant') {
+				libx.log.w('replay: the last message was from the assistant, not sending...');
+				return;
+			} else {
+				libx.log.i('replay: the last message was from user, resending');
+				await this.submit({ isReplay: true});
+			}
+		},
+	},
+	watch: {
+		messages(val) {
+			cacheMgr._cache.set('messages', val);
+		},
+	},
+	computed: {
+		inputHeight() {
+			const rows = (this.userMessage?.match(/\n/g)?.length || 0) + 1;
+			return rows; // & 12;
+		},
+	},
+	components: {}
+};
+</script>
+
+<style lang="less" scoped>
+@import (reference) '../styles/essentials.less';
+@import (reference) '../styles/style.less';
+
+@borderColor: #888;
+
+.box-info { border-left:5px solid #333; padding:10px 20px; margin-bottom:10px; }
+.box-info-desc { line-break: anywhere; padding-right: 30px; }
+
+.box-messages { overflow-y: scroll; position: relative; border: 1px solid @borderColor; margin-bottom: 5px; padding: 1em; }
+.box-messages-item { margin-bottom:20px; position:relative; }
+.box-messages-item-content { background-color: #eee; padding:10px; white-space:break-spaces; }
+.box-messages-item-hover { display:none; }
+.box-messages-item:hover .box-messages-item-hover { display:inline-flex; }
+.message-bot { margin-left: 60px; text-align: right; }
+.message-user { margin-right: 60px; }
+.message-bot:before { content: '> '; }
+.message-user:before { content: '< '; }
+.box-messages-item-hover { position:absolute; right:0px; top:5px; }
+.chat-control { min-height:42px; max-height:42px*2; }
+.user-input { border: 1px solid @borderColor !important; }
+
+.chunk pre { white-space: break-spaces; }
+
+.btn-sqr { font-size: 8px; width: 11px; height: 22px; padding: 10px; border: 1px solid #aaa; background-color: #eee; }
+.btn-submit[disabled], .btn-sqr[disabled] { opacity: .5; cursor: not-allowed; }
+
+.output-html {
+	p { margin-top:0; margin-bottom:0; }
+	img { min-width:40px; min-height:40px; border: 1px solid #999; background-color:#555 ; }
+}
+
+</style>

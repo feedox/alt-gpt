@@ -1,0 +1,38 @@
+// Hero head: will stick at the top
+.hero.is-dark.hero-head.bg-dark.is-dark
+    header(v-if="!$app.layout?.isHideHeader",v-cloak)
+        nav.navbar(role="navigation", aria-label='main navigation').has-navbar-fixed-top
+            .navbar-brand
+                router-link(to="/").navbar-item
+                    h4(v-cloak).primary.extra-bold.margin0 {{appName}}
+                        span(hide-xs, v-if="headers?.viewName") /
+                        span.secondary(v-cloak, hide-xs) {{headers?.viewName}} 
+
+                //- .navbar-item.user-email(style="margin-left:auto;")
+                    a(@click="$app.helpers.navigate('/profile')", v-show="$app.userManager?.data?.private?.email",v-cloak) {{$app.userManager?.data?.private?.email}}
+                
+                a.navbar-burger(data-target='navbarMenuHeroC', @click="isMenuActive=!isMenuActive", role="button",aria-label="menu",aria-expanded="false").fg-white
+                    span
+                    span
+                    span
+
+            //- #navbarMenuHeroC.navbar-menu(:class="{ 'is-active': isMenuActive }",v-cloak)
+                .navbar-end
+                    span.navbar-item(v-if="!$app.layout?.isSignedIn")
+                        span(v-if="$app.layout?.isSignedIn") 
+                            a.is-secondary.is-inverted(@click="$app.api.signout()").padding5
+                                .icon
+                                    i.fas.fa-sign-out-alt 
+                                span &nbsp;Logout
+                        span
+                            a.is-secondary.is-inverted(@click="$app.api.showLogin()").padding5
+                                .icon
+                                    i.fas.fa-sign-in-alt 
+                                span &nbsp;Login
+
+                    span.navbar-item(v-if="$app.layout?.isSignedIn",hide-gt-xs)
+                        span
+                            a.is-secondary.is-inverted(@click="$app.api.signout()").padding5
+                                .icon
+                                    i.fas.fa-sign-out-alt 
+                                span &nbsp;Logout

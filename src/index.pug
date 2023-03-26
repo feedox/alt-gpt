@@ -1,0 +1,184 @@
+- var projconfig = JSON.parse(JSON.stringify(config)); // <- Executed by pug, will remove private config from public web javascript context
+- var livereloadPort = projconfig.private.livereloadPort;
+- delete projconfig.private; // <- Executed by pug, will remove private config from public web javascript context
+- var isDev = projconfig.env == 'dev';
+
+doctype html
+
+html
+	head
+		if !isDev 
+			// GoogleAnalytics
+			script(src='https://www.googletagmanager.com/gtag/js?id=G-E1MN3VCM7J',skip)
+			script.
+				try{
+					window.dataLayer = window.dataLayer || [];
+					function gtag(){dataLayer.push(arguments);}
+					gtag('js', new Date());
+					gtag('config', 'G-E1MN3VCM7J');
+					ga('send', 'pageview');
+				} catch {}
+		
+		meta(name="google-signin-client_id",content="710533358777-nvg6mps7vq51ok3tmdhou8cftldhcn0n.apps.googleusercontent.com")
+
+		meta(charset='utf-8')
+		meta(name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui")
+		meta(name="fragment",content="!")
+		base(href="/")
+
+		title() feedox
+		include ./exMeta.pug
+		
+		// build:css bundle/bundle.css
+		//- Frame styles:
+		link(rel="stylesheet",href="./node_modules/frame.libx.js/build-web/bundle/bundle.css")
+		link(rel="stylesheet",href="./node_modules/frame.libx.js/build-web/styles/icons.css")
+		link(rel="stylesheet",href="styles/style.css",defer)
+		link(rel="stylesheet",href="styles/vue-components.css",defer)
+			
+		//- Project styles:
+		//- link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css')
+		//- link(rel="stylesheet",href="https://unpkg.com/buefy@0.9.3/dist/buefy.min.css",defer)
+		//- link(rel="stylesheet",href="./node_modules/buefy/dist/buefy.css",defer)
+		// endbuild
+		
+
+		// build:jsBundle bundle/libs.js
+		//- Frame scripts:
+		//- script(src="./node_modules/frame.libx.js/build-web/bundle/libs.js")
+
+		//- The core Firebase JS SDK is always required and must be listed first
+		//- script(src='https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js')
+		//- script(src='https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js')
+		//- script(src='https://www.gstatic.com/firebasejs/9.6.7/firebase-database-compat.js')
+		//- script(src='https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js')
+		//- script(src='https://www.gstatic.com/firebasejs/9.6.7/firebase-analytics-compat.js')
+
+		//- SystemJS:
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/system.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/extras/named-exports.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/extras/named-register.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/extras/global.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/extras/use-default.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.6.1/extras/dynamic-import-maps.min.js')
+
+		//- script(src="/frame/scripts/ts/browserified/frame.js")
+		//- script(src="/scripts/ts/browserified/index.js")
+
+		//- Project scripts:
+		//- script(src="./node_modules/sanitize-html/index.js")
+		// endbuild
+
+		script.
+			var exports = {}; // quick fix because 'exports' is not defined in rich-text bundle below
+			window.prerenderReady = false;
+			window.projconfig = !{JSON.stringify(projconfig)};
+
+	body
+		#app.app-container
+			section.hero.is-fullheight
+				include header.pug
+			
+				// Hero content: will be in the middle
+				section.hero.is-success.is-fullheight(v-show='!isReady').has-background-grey-darker
+					.hero-body
+						.container
+							h1.title.text-center 
+								span.loader
+								span.middled &nbsp; Loading...
+							//- h2.subtitle
+								
+				div(v-show='isReady')
+					main.app-content
+						//- keep-alive
+						router-view(v-cloak)
+				
+				include footer.pug
+			
+	script.
+		document.addEventListener('DOMContentLoaded', () => {
+			(document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+				$notification = $delete.parentNode;
+				$delete.addEventListener('click', () => {
+					$notification.parentNode.removeChild($notification);
+				});
+			});
+		});
+
+	// IE11 Support:
+	script.
+		if (typeof Promise === 'undefined')
+		document.write('<script src="https://unpkg.com/bluebird@3.7.2/js/browser/bluebird.core.min.js"><\\/script>');
+		if (typeof fetch === 'undefined')
+		document.write('<script src="https://unpkg.com/whatwg-fetch@3.4.1/dist/fetch.umd.js"><\\/script>');
+
+	script(type='systemjs-importmap').
+		{
+			"imports": {
+				"@scripts/ts/browserified/": "/scripts/ts/browserified/",
+				"@proj/libs/src": "/scripts/ts/libs/",
+				"frame.libx.js/build-web/": "/frame/",
+				"libx.js/": "node_modules/libx.js/",
+				"libx.js/build/bundles/browser.essentials": "node_modules/libx.js/build/bundles/browser.essentials.js"
+			}
+		}
+	// load a locally hosted module
+	script(type="application/javascript").
+		{
+			//- const a = System.import('/frame/scripts/ts/browserified/frame.js');
+			const b = System.import('/scripts/ts/browserified/index.js');
+			Promise.all([b]).then(async (m)=> {
+				System.import('/scripts/ts/index.js').then(async (mod)=> {
+					await mod.bootstrap();
+					console.log('bootstrapped')
+				});
+			});
+		}
+
+	//- Meta Pixel:
+	if !isDev 
+		script.
+			!function(f,b,e,v,n,t,s)
+			{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+			n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+			if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+			n.queue=[];t=b.createElement(e);t.async=!0;
+			t.src=v;s=b.getElementsByTagName(e)[0];
+			s.parentNode.insertBefore(t,s)}(window, document,'script',
+			'https://connect.facebook.net/en_US/fbevents.js');
+			fbq('init', '605895997858620');
+			fbq('track', 'PageView');
+		noscript
+			img(height='1', width='1', style='display:none', src='https://www.facebook.com/tr?id=605895997858620&ev=PageView&noscript=1')
+		
+	//- FullStory:
+	if !isDev 
+		script.
+			window['_fs_debug'] = false;
+			window['_fs_host'] = 'fullstory.com';
+			window['_fs_script'] = 'edge.fullstory.com/s/fs.js';
+			window['_fs_org'] = '17Z17E';
+			window['_fs_namespace'] = 'FS';
+			(function(m,n,e,t,l,o,g,y){
+				if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
+				g=m[e]=function(a,b,s){g.q?g.q.push([a,b,s]):g._api(a,b,s);};g.q=[];
+				o=n.createElement(t);o.async=1;o.crossOrigin='anonymous';o.src='https://'+_fs_script;
+				y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y);
+				g.identify=function(i,v,s){g(l,{uid:i},s);if(v)g(l,v,s)};g.setUserVars=function(v,s){g(l,v,s)};g.event=function(i,v,s){g('event',{n:i,p:v},s)};
+				g.anonymize=function(){g.identify(!!0)};
+				g.shutdown=function(){g("rec",!1)};g.restart=function(){g("rec",!0)};
+				g.log = function(a,b){g("log",[a,b])};
+				g.consent=function(a){g("consent",!arguments.length||a)};
+				g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
+				g.clearUserCookie=function(){};
+				g.setVars=function(n, p){g('setVars',[n,p]);};
+				g._w={};y='XMLHttpRequest';g._w[y]=m[y];y='fetch';g._w[y]=m[y];
+				if(m[y])m[y]=function(){return g._w[y].apply(this,arguments)};
+				g._v="1.3.0";
+			})(window,document,window['_fs_namespace'],'script','user');
+
+
+		
+
+
+

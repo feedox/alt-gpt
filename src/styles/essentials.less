@@ -1,0 +1,65 @@
+@import "../../node_modules/frame.libx.js/src/web/src-web/styles/essentials.less";
+
+
+
+.term .btn { padding: 10.5px 29px; }
+.btn { height:auto; cursor:pointer; border-radius:4px; text-decoration: none; text-transform: uppercase; min-height: 40px; padding:10px 20px; }
+
+button { .pointer; border-radius: 0px; padding: 8px 20px; border: 1px solid black; }
+
+@btn-color: @blue;
+.btn { background:white; border:1px solid darken(@btn-color, 4%); box-shadow:0px 2px 0 darken(@btn-color, 5%), 2px 4px 6px darken(@btn-color, 2%); font-weight:900; letter-spacing:1px; transition:all 150ms ease; position: relative; top: 0; }
+.btn:hover { 
+	box-shadow:0px 4px 0 darken(@btn-color, 5%), 4px 8px 12px darken(@btn-color, 2%);
+	text-decoration:none; t-ext-shadow:-1px -1px 0 darken(@btn-color, 9.5%); transition:all 250ms linear; 
+	top: -3px; }
+.btn-primary { background:lighten(@btn-color, 3%); }
+
+.btn-2:hover:before {
+  bottom: auto;
+  top: 0;
+  width: 70%;
+}
+
+a[disabled] { filter: grayscale(80%); }
+.dots(@color:#0fb8f555) {
+	background-image:radial-gradient(@color 0.01rem, transparent 0.12rem); background-size:1rem 1rem;
+}
+.dots() { .dots(#0fb8f555); }
+.dots::before {
+	content: ''; 
+	.dots();
+	top:100px; left:0; width:40%; height:24rem; position:absolute; z-index:0;
+}
+.dots::after {
+	content: ''; 
+	.dots();
+	bottom:100px; right:0; height:24rem; width:40%; position:absolute; z-index:0;
+}
+
+.blurry { filter: blur(3px); }
+.blurry * { .blurry; }
+.blurry-text { color: transparent !important; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.blurry-text * { .blurry-text; }
+
+.reverse { flex-flow: row-reverse; }
+
+.sitebg { position:fixed; top:50%; left:50%; min-width:100%; min-height:100%; width:auto; height:auto; z-index:0; transform:translate(-50%,-50%); opacity:.1; }
+.hero-head, .footer { z-index:1; }
+
+.term .btn-group { overflow:visible; }
+
+.i-3dots-v { width: 18px; height: 42px; padding: 14px; background-image: radial-gradient(circle, black 3px, transparent 2px); background-size: 100% 33.33%; }
+
+div:has(>.app-content) { /*justify-content: flex-start;*/ flex:1; }
+
+.term li:has(>input[type='checkbox']), .term li>ul>li:has(>input[type='checkbox']) { padding-left:0;
+	input { margin-right:10px; }
+}
+.term ul:has(input[type='checkbox']) > li::after { content: none; }
+
+.dropdown .icon { font-size: 15px; height: 100%; }
+
+.widget-botify { padding:10px 10px 0 10px; }
+.box-messages { min-height:550px; max-height:550px;  }
+.widget-botify .box-messages { min-height:480px; max-height:480px;  }

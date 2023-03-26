@@ -1,0 +1,54 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"lib": ["ES2016", "DOM", "DOM.Iterable", "ES2015.Promise", "ES2019"],
+		"module": "System",
+		"moduleResolution": "node",
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"experimentalDecorators": true,
+		"declaration": true,
+		"sourceMap": true,
+		"outDir": "./build/scripts/ts",
+		"rootDir": "./src/scripts",
+		"typeRoots": ["node_modules/@types", ".", "./src"],
+		"skipLibCheck": true,
+		"baseUrl": "./src/scripts",
+		"allowSyntheticDefaultImports": true,
+		"downlevelIteration": true,
+		"esModuleInterop": true,
+		"allowJs": true,
+
+		"types": [
+			"jest",
+			"buefy",
+			"libx.js",
+			"node",
+			"vue",
+			"vue-router",
+			"systemjs",
+			"frame.libx.js"
+		],
+		"paths": {
+			"@scripts/ts/browserified/*": ["./ts/browserified/*"],
+			"@proj/libs/src": ["@proj/libs/build"],
+			"/frame/scripts/ts/browserified/frame.js": [
+				"../../node_modules/frame.libx.js/build-web/scripts/ts/browserified/frame.js"
+			],
+			"/frame/scripts/ts/browserified/frame-libs.js": ["../../node_modules/frame.libx.js/build-web/scripts/ts/browserified/frame-libs"],
+			"/frame/scripts/ts/*": ["../../node_modules/frame.libx.js/build-web/scripts/ts//*"],
+			"frame.libx.js/build-web/*": ["build-web/frame/*"],
+			"/scripts/*": ["./*"],
+			"./*": ["./ts/*"]
+		}
+	},
+	"files": ["node_modules/frame.libx.js/src/web/src-web/scripts/ts/global.d.ts", "node_modules/frame.libx.js/src/web/src-web/scripts/ts/vue.d.ts"],
+	"include": ["./src/scripts/ts/**/*.d.ts", "./src/scripts/ts/**/*.ts", "./src/**/*.vue", "../libs/lib/**/*.ts"],
+	"exclude": ["node_modules/**/*", "./src/scripts/ts/browserified/**/*", "./src/scripts/standalone/**/*", "../libs/lib/**/*", "api/**/*"],
+	"vueCompilerOptions": {
+		"experimentalCompatMode": 2,
+		"experimentalTemplateCompilerOptions": {
+			"compatConfig": { "MODE": 2 } // optional
+		}
+	}
+}

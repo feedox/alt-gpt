@@ -1,0 +1,72 @@
+{
+	"name": "chatgpt-plugins-playground",
+	"version": "0.0.1",
+	"author": "Feedox",
+	"main": "index.js",
+	"license": "AGPL-3.0",
+	"scripts": {
+		"build": "node node_modules/frame.libx.js/build/webBundler.js --src=\"src\" --minify && yarn build:standalone",
+		"watch": "node node_modules/frame.libx.js/build/webBundler.js --src='src' --watch --serve",
+		"serve": "node build.js --serve",
+		"serve:log": "yarn start >> log.txt",
+		"test": "jest",
+		"test:ci": "jest --ci --reporters=default --reporters=jest-junit --coverage --coverageReporters=cobertura --coverageReporters=html",
+		"debug": "node --inspect build.js --watch --serve"
+	},
+	"dependencies": {
+		"@babel/preset-react": "^7.17.12",
+		"@types/jest": "^28.1.1",
+		"@types/node": "^18.0.0",
+		"@types/systemjs": "^6.1.1",
+		"axios": "^0.27.2",
+		"babel-preset-es2015": "^7.0.0-beta.3",
+		"babel-preset-stage-0": "^7.0.0-beta.3",
+		"buefy": "^0.9.21",
+		"bulma": "^0.9.4",
+		"bulma-toast": "^2.4.1",
+		"bulma-tooltip": "^3.0.2",
+		"frame.libx.js": "^0.3.0",
+		"hotkeys-js": "^3.10.1",
+		"libx.js": "^2.35.0",
+		"lottie-web": "^5.9.4",
+		"moment": "^2.29.3",
+		"node-sass": "^7.0.1",
+		"openai": "^3.2.1",
+		"pug": "^3.0.2",
+		"sanitize-html": "^2.7.0",
+		"showdown": "^2.1.0",
+		"systemjs": "^6.12.1",
+		"terminal.css": "^0.7.2",
+		"typescript": "^4.7.3",
+		"vue": "2.7.10",
+		"vue-router": "^3.5.4",
+		"vue-sanitize": "^0.2.2",
+		"vue-template-compiler": "2.7.10"
+	},
+	"devDependencies": {
+		"@babel/plugin-proposal-decorators": "^7.18.2",
+		"@babel/plugin-proposal-pipeline-operator": "^7.18.2",
+		"@babel/plugin-transform-runtime": "^7.18.5",
+		"@vue/runtime-dom": "latest",
+		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+		"jest": "^28.1.1",
+		"jest-junit": "^13.2.0",
+		"jest-junit-reporter": "^1.1.0",
+		"ts-jest": "^28.0.5"
+	},
+	"jest": {
+		"coverageReporters": [
+			"cobertura",
+			"html"
+		]
+	},
+	"jest-junit": {
+		"suiteName": "jest tests",
+		"outputDirectory": "build/test_reports",
+		"output": "./.tmp/test/TEST-RESULTS.xml",
+		"classNameTemplate": "{classname} - {title}",
+		"titleTemplate": "{classname} - {title}",
+		"ancestorSeparator": " > ",
+		"usePathForSuiteName": "true"
+	}
+}
