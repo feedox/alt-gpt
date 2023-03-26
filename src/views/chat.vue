@@ -62,7 +62,7 @@
 							div
 								b-field(label='Model').no-margin
 									b-select(placeholder='Selected Model', v-model="cache.model")
-										option(v-for='(v, k) in models' :value='v' :key='k') {{ v }}
+										option(v-for='(v, k) in models' :value='v.split(":").pop()' :key='k') {{ v }}
 
 							div
 								.control.flex
@@ -106,8 +106,13 @@ export default {
 			docs: [],
 			docsSelected: [],
 			models: [
-				'gpt-3.5-turbo-0301',
-				'gpt-4-0314',
+				'openai:gpt-3.5-turbo-0301',
+				'openal:gpt-4-0314',
+				'openai:text-davinci-002',
+				'cohere:command-xlarge-nightly',
+				'cohere:xlarge',
+				'anthropic:claude-instant-v1.0',
+				'ai21:j2-grande-instruct',
 			]
 		};
 	},
