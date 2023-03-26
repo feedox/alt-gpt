@@ -17,9 +17,9 @@ div
 			.box-messages-item-hover.layout-column
 				.icon.btn-sqr.message-replay(label='replay from here', @click="replay(msg, i)", :disabled="isActive").pointer
 					i.fas.fa-redo
-				.icon.btn-sqr.message-speak(v-if="!isSpeaking", label='read out loud this message', @click="speak(msg.content)").pointer
+				//- .icon.btn-sqr.message-speak(v-if="!isSpeaking", label='read out loud this message', @click="speak(msg.content)").pointer
 					i.fas.fa-volume-up
-				.icon.btn-sqr.message-speak(v-if="isSpeaking", label='stop read out loud', @click="stopSpeak()").pointer
+				//- .icon.btn-sqr.message-speak(v-if="isSpeaking", label='stop read out loud', @click="stopSpeak()").pointer
 					i.fas.fa-volume-mute
 
 	form(@submit.prevent="submit", :disabled="isLoading").layout-row
