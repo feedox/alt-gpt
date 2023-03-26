@@ -1,0 +1,15 @@
+[build]
+  command = "yarn && yarn build"
+  base    = ""
+  publish = "build-web"
+
+[build.environment]
+  NODE_VERSION = "14.18.2"
+  NETLIFY_USE_YARN = "true"
+  NETLIFY_YARN_WORKSPACES = "true"
+  NODE_ENV = "production"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
