@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // or higher
+    // "module": "nodenext",
+    "module": "esnext",
+    // "module": "CommonJS",
+    "lib": ["ES2016", "DOM", "DOM.Iterable", "ES2015.Promise", "ES2019"],
+    "moduleResolution": "node",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "typeRoots": ["node_modules/@types", "."],
+    "inlineSources": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declaration": true,
+
+    "paths": {},
+    "types": ["jest", "node"],
+    "outDir": "build",
+    "rootDir": "./src"
+    // "baseUrl": "./src"
+  },
+
+  "include": ["./src/**/*.d.ts", "./src/**/*.ts"],
+  "exclude": ["node_modules/**/*", "dist", "build", "tests"]
+}

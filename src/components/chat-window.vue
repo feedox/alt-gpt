@@ -55,6 +55,7 @@ import { showdown, hotkeys } from '/scripts/ts/browserified/libs.js';
 import helpers from '/scripts/ts/app/app.helpers.js';
 import { OpenAI } from '/scripts/ts/modules/OpenAI.js';
 import { IConvMessage } from '../scripts/ts/types/IConvMessage';
+import { AltGPT } from '/scripts/ts/modules/AltGPT.js';
 
 var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
 let cacheMgr = <ProxyCache>null;
@@ -90,6 +91,7 @@ export default {
 	props: {
 		botId: String,
 		docsIds: Array,
+		selectedPlugins: Array,
 		config: {},
 		showInfo: Boolean,
 		showMore: {
@@ -116,6 +118,7 @@ export default {
 			relatedChunks: [],
 			isActive: false,
 			isNewModel: false,
+			altGpt: new AltGPT(),
 		};
 	},
 	methods: {
@@ -127,13 +130,36 @@ export default {
 				// { role: "assistant", content: "Hey, how can I help you today?", },
 			];
 			this.userMessage = this.config?.defaultInput ?? this.bot?.defaultInput;
+
+			if (this.selectedPlugins?.length > 0 && this.selectedPlugins[0].examplePrompt) {
+				this.userMessage = this.selectedPlugins[0].examplePrompt;
+			}
 		},
 		async submit({isReplay=false}) {
 			if (this.isActive) return;
 			const msg = this.userMessage;
 			console.log('submit: ', msg);
-
+			
 			this.isLoading = true; this.$forceUpdate();
+			
+			if (this.selectedPlugins?.length > 0) {
+				try{
+					console.log('chat:submit: Selected plugins: ', this.selectedPlugins);
+					const plugin = this.selectedPlugins[0];
+
+					const response = await this.altGpt.callAgent(plugin.url, this.userMessage, this.config.apikey, this.config);
+					this.messages.push(<IConvMessage>{ role: 'assistant', content: response.result.output });
+				} catch(err) {
+					let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error || err?.message);
+	
+					helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
+					this.isLoading = false; this.$forceUpdate();
+					console.error(err);
+				}
+				this.isLoading = false;
+
+				return;
+			}
 
 			let newResponse = null;
 			
@@ -218,6 +244,12 @@ export default {
 		messages(val) {
 			cacheMgr._cache.set('messages', val);
 		},
+		selectedPlugins(val) {
+			// this.reset();
+			if (this.selectedPlugins?.length > 0 && this.selectedPlugins[0].examplePrompt) {
+				this.userMessage = this.selectedPlugins[0].examplePrompt;
+			}
+		}
 	},
 	computed: {
 		inputHeight() {
