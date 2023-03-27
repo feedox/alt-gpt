@@ -148,6 +148,8 @@ export default {
 					const plugin = this.selectedPlugins[0];
 
 					const response = await this.altGpt.callAgent(plugin.url, this.userMessage, this.config.apikey, this.config);
+					const newUserMsg = <IConvMessage>{ role: 'user', content: msg };
+					this.messages.push(newUserMsg);
 					this.messages.push(<IConvMessage>{ role: 'assistant', content: response.result.output });
 				} catch(err) {
 					let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error || err?.message);
