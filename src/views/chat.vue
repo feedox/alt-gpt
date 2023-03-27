@@ -135,6 +135,7 @@ export default {
 		if (this.cache.temperature == undefined) this.cache.temperature = 0.8;
 		if (this.cache.showConfig == undefined) this.cache.showConfig = false;
 		if (this.cache.model == undefined) this.cache.model = this.models[0];
+		if (this.cache.apikey == undefined) this.cache.apikey = '';
 		if (Object.keys(this?.$route?.query ?? {}).contains('gpt4')) this.cache.model = this.models[1];
 
 		if (this.cache.docsSelected == undefined) this.cache.docsSelected = [];
