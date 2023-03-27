@@ -17,6 +17,20 @@
 				.box-plugins.box-chat-column(flex-gt-xs="20") 
 					fieldset
 						legend Plugins
+						.terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/chatgpt-plugins-playground/issues/1" target="_blank">in progress</a>.
+						.box-plugins-list
+							.box-plugins-item(v-for="item in plugins") 
+								.layout-row.layout-align-space-between-center
+									.box-plugins-item-icon
+										img.bg-img(:src="item.icon") 
+									.box-plugins-item-name.text-truncate(:title="item.name")
+										span {{ item.name }}
+								.layout-row.layout-align-space-between-end
+									.box-plugins-item-desc {{ item.desc }}
+									//- input.box-plugins-item-checkbox(type="checkbox")
+									input.box-plugins-item-checkbox(type='checkbox', v-model='selectedPlugins', :value="item.id", :id='item.id', :true-value="[]", :disabled="selectedPlugins?.length > 0 && selectedPlugins[0] != item.id") 
+
+								//- {{ item }}
 				.box-main.box-chat-column(flex) 
 					fieldset
 						legend Chat
@@ -65,10 +79,18 @@
 										option(v-for='(v, k) in models' :value='v.split(":").pop()' :key='k') {{ v }}
 
 							div
+								b-field(label='Max Tokens')
+									b-slider(v-model='cache.max_tokens', indicator, :tooltip='false', :min='128', :max='4096', :step="128", ticks, size="is-small" )
+
+							div
 								.control.flex
-									label.label OpenAI API Key:
+									.layout-row.layout-align-space-between-start
+										label.label OpenAI API Key:
+										b-tooltip(label='Your key is never sent anywhere else than OAI. It is stored in local cache for your convinvience.', multilined, type='is-dark', position='is-left')
+											i.fas.fa-info-circle
 									input(v-model='cache.apikey', type="password").hero
 
+								
 							//- .box-documents 
 								h4 Context Documents 
 									span (
@@ -113,7 +135,12 @@ export default {
 				'cohere:xlarge',
 				'anthropic:claude-instant-v1.0',
 				'ai21:j2-grande-instruct',
-			]
+			],
+			showKeyWarning: true,
+			plugins: [
+				{ id:1, name: 'Klarna Shopping', url: 'https://www.klarna.com/.well-known/ai-plugin.json', desc: 'Search and compare prices from thousands of online shops', examplePrompt: 'what t shirts are available in klarna?', icon: 'https://e7.pngegg.com/pngimages/426/901/png-clipart-klarna-circle-icon-tech-companies-thumbnail.png' },
+			],
+			selectedPlugins: [],
 		};
 	},
 	created() {
@@ -136,11 +163,16 @@ export default {
 		if (this.cache.showConfig == undefined) this.cache.showConfig = false;
 		if (this.cache.model == undefined) this.cache.model = this.models[0];
 		if (this.cache.apikey == undefined) this.cache.apikey = '';
+		if (this.cache.max_tokens == undefined) this.cache.max_tokens = 256;
 		if (Object.keys(this?.$route?.query ?? {}).contains('gpt4')) this.cache.model = this.models[1];
 
-		if (this.cache.docsSelected == undefined) this.cache.docsSelected = [];
-		this.docsSelected = this.cacheMgr._cache.get('docsSelected');
-		if (this.docsSelected?.length > 0 && libx.isString(this.cache.docsSelected)) this.cache.docsSelected = this.docsSelected = libx.parse(this.cache.docsSelected) ?? [];
+		if (this.cache.selectedPlugins == undefined) this.cache.selectedPlugins = [];
+		this.selectedPlugins = this.cacheMgr._cache.get('selectedPlugins');
+		if (this.selectedPlugins?.length > 0 && libx.isString(this.cache.selectedPlugins)) this.cache.selectedPlugins = this.selectedPlugins = libx.parse(this.cache.selectedPlugins) ?? [];
+
+		// if (this.cache.docsSelected == undefined) this.cache.docsSelected = [];
+		// this.docsSelected = this.cacheMgr._cache.get('docsSelected');
+		// if (this.docsSelected?.length > 0 && libx.isString(this.cache.docsSelected)) this.cache.docsSelected = this.docsSelected = libx.parse(this.cache.docsSelected) ?? [];
 
 		if (this.docId != null) this.docsSelected = [this.docId];
 	},
@@ -181,6 +213,9 @@ export default {
 		messages(val) {
 			this.cacheMgr._cache.set('messages', val);
 		},
+		selectedPlugins(val) {
+			this.cache.selectedPlugins = val;
+		}
 		// docsSelected(val) {
 		// 	console.log('docsSelected changed' )
 		// 	this.cache.docsSelected = val;
@@ -197,6 +232,7 @@ export default {
 				priming: this.cache.priming,
 				defaultInput: this.cache.defaultInput, 
 				apikey: this.cache.apikey, 
+				max_tokens: this.cache.max_tokens, 
 			}
 		},
 		renderHtml: app.helpers.bindQueryParam('renderHtml', 'false', true),
@@ -234,9 +270,16 @@ button.liked { color:red; }
 	fieldset {
 		@media screen and (min-width: 600px){ /* xs */
 			height: 660px;
-			overflow-y: scroll;
+			max-width: 660px;
+			// overflow-y: scroll;
 		}
 	}
+}
+
+.box-plugins-item {
+	border: 1px solid @dark; padding:10px; margin-bottom:20px;
+	.box-plugins-item-name { .bold; }
+	.box-plugins-item-icon { width:60px; margin-right:10px; h-eight:60px; }
 }
 
 </style>
