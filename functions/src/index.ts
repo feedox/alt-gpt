@@ -9,6 +9,8 @@ app.use('/foo', foo); // just for testing
 
 export const api = app;
 
-app.listen(8080, () => {
-	console.log('Server listening on 0.0.0.0:8080');
-});
+if (process.env.K_SERVICE == null) {
+	app.listen(8080, () => {
+		console.log('Server listening on 0.0.0.0:8080');
+	});
+}
