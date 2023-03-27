@@ -1,31 +1,31 @@
 {
-	"projectName": "chatgpt-plugins-playground",
-	"projectCaption": "feedox/chatgpt-plugins-playground",
-	"version": "0.0.1",
-	"private": {
-		"appStoreId": "",
-		"livereload": false,
-		"livereloadPort": 35731,
-		"debugHost": "0.0.0.0",
-		"debugIsSecure": false,
-		"debugPort": 3001,
-		"reloadDebounceMS": 500,
-		"reloadGraceMS": 500
-	},
+  "projectName": "chatgpt-plugins-playground",
+  "projectCaption": "chatgpt-plugins-playground",
+  "version": "0.0.1",
+  "private": {
+    "appStoreId": "",
+    "livereload": false,
+    "livereloadPort": 35731,
+    "debugHost": "0.0.0.0",
+    "debugIsSecure": false,
+    "debugPort": 3001,
+    "reloadDebounceMS": 500,
+    "reloadGraceMS": 500
+  },
 
-	"compiledFolder": "./src/compile/",
-	"compiledMainEntry": "main.js",
+  "compiledFolder": "./src/compile/",
+  "compiledMainEntry": "main.js",
 
-	"envs": {
-		"prod": {
-			"env": "prod"
-		},
-		"dev": {
-			"env": "dev",
-			"websiteUrl": "https://localhost:{{debugPort}}",
-			"private": {
-				"someSpecialValueForDev": 111
-			}
-		}
-	}
+  "envs": {
+    "prod": {
+      "env": "prod"
+    },
+    "dev": {
+      "env": "dev",
+      "websiteUrl": "https://localhost:{{debugPort}}",
+      "private": {
+        "someSpecialValueForDev": 111
+      }
+    }
+  }
 }
