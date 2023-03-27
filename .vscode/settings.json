@@ -1,0 +1,25 @@
+{
+  "debug.node.autoAttach": "off",
+  "files.exclude": {
+    "build/": true,
+    "src/styles/vue-components.css": false
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "vetur.experimental.templateInterpolationService": true,
+  "editor.formatOnSave": true,
+  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "javascript.updateImportsOnFileMove.enabled": "prompt",
+  "vetur.languageFeatures.updateImportOnFileMove": false,
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "SimonSiefke.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "SimonSiefke.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
+}

@@ -1,0 +1,46 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Node Attach",
+			"type": "node",
+			"request": "attach",
+			"port": 9229,
+			"restart": true,
+			"smartStep": true,
+			"skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "${workspaceFolder}/lib/**/*.js", "<node_internals>/**/*.js"]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Typescript",
+			"program": "${file}", //"${workspaceFolder}/main.ts",
+			"console": "internalConsole",
+			"internalConsoleOptions": "openOnFirstSessionStart",
+			"showAsyncStacks": true,
+			"preLaunchTask": "tsc: build - tsconfig.json",
+			"outFiles": ["${workspaceFolder}/build/**/*.js"],
+			"runtimeArgs": ["--harmony", "--no-deprecation"],
+			"smartStep": true,
+			"skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "${workspaceFolder}/lib/**/*.js", "<node_internals>/**/*.js"]
+		}
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Typescript:API",
+			"program": "${file}", //"${workspaceFolder}/main.ts",
+			"console": "internalConsole",
+			"internalConsoleOptions": "openOnFirstSessionStart",
+			"cwd": "${workspaceFolder}/api",
+			"showAsyncStacks": true,
+			"preLaunchTask": "tsc: build - api/tsconfig.json",
+			"outFiles": ["${workspaceFolder}/api/build/**/*.js"],
+			"runtimeArgs": ["--harmony", "--no-deprecation"],
+			"smartStep": true,
+			"skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "${workspaceFolder}/lib/**/*.js", "<node_internals>/**/*.js"]
+		}
+	]
+}
