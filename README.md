@@ -1,7 +1,7 @@
 # chatgpt-plugins-playground
 Multi-model and multi-vendor playground for developing ChatGPT plugins (and other LLMs) 
 
-<img width="1167" alt="image" src="https://user-images.githubusercontent.com/246724/227760783-0cf916a9-56ba-4671-9cd0-f670b49e8d16.png">
+<img width="1170" alt="image" src="https://user-images.githubusercontent.com/246724/228020793-a298d777-fb40-44ab-b61d-04ba047bb3ae.png">
 
 ## Features:
 - 🌟 Plugins: Support AI plugins, discover and use public publics and develop locally your new plugin! 
