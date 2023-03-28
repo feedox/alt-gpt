@@ -283,8 +283,8 @@ button.liked { color:red; }
 .box-chat-column {
 	fieldset {
 		@media screen and (min-width: 600px){ /* xs */
-			height: 660px;
-			max-width: 660px;
+			height:660px;
+			max-width:710px;
 			// overflow-y: scroll;
 		}
 	}
