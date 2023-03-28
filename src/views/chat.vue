@@ -154,28 +154,24 @@ export default {
 			selectedPlugins: [],
 		};
 	},
-	created() {
-		helpers.updateMeta({...this.$app.layout.headers, ...{
-			appName: 'alt-gpt',
-			viewName: 'Chat',
-			pageTitle: 'feedox/chatgpt-plugins-playground',
-			desc: 'ChatGPT Playground',
-			// image: '/resources/imgs/main/main-link-preview-innovation.png',
-		}});
-
-		this.cacheMgr = new ProxyCache(`ai-chat-${this.botId}`, {});
+	beforeMount() {
+		const defaultCache = {
+			botName: '',
+			userMessage: '',
+			defaultInput: 'Hey',
+			priming: '',
+			frequency_penalty: 0,
+			presence_penalty: 0,
+			temperature: 0.8,
+			showConfig: false,
+			model: this.models[0].split(':').pop(),
+			apikey: '',
+			max_tokens: 256,
+		}
+		this.cacheMgr = new ProxyCache(`ai-chat-${this.botId}`, defaultCache);
 
 		this.cache = this.cacheMgr.proxy;
-		if (this.cache.botName == undefined) this.cache.botName = '';
-		if (this.cache.userMessage == undefined) this.cache.userMessage = '';
-		if (this.cache.frequency_penalty == undefined) this.cache.frequency_penalty = 0;
-		if (this.cache.presence_penalty == undefined) this.cache.presence_penalty = 0;
-		if (this.cache.temperature == undefined) this.cache.temperature = 0.8;
-		if (this.cache.showConfig == undefined) this.cache.showConfig = false;
-		if (this.cache.model == undefined) this.cache.model = this.models[0];
-		if (this.cache.apikey == undefined) this.cache.apikey = '';
-		if (this.cache.max_tokens == undefined) this.cache.max_tokens = 256;
-		if (Object.keys(this?.$route?.query ?? {}).contains('gpt4')) this.cache.model = this.models[1];
+		if (Object.keys(this?.$route?.query ?? {}).contains('gpt4')) this.cache.model = this.models[1].split(':').pop();
 
 		if (this.cache.selectedPlugins == undefined) this.cache.selectedPlugins = [];
 		this.selectedPlugins = this.cacheMgr._cache.get('selectedPlugins');
@@ -186,6 +182,16 @@ export default {
 		// if (this.docsSelected?.length > 0 && libx.isString(this.cache.docsSelected)) this.cache.docsSelected = this.docsSelected = libx.parse(this.cache.docsSelected) ?? [];
 
 		if (this.docId != null) this.docsSelected = [this.docId];
+	},
+	created() {
+		helpers.updateMeta({...this.$app.layout.headers, ...{
+			appName: 'alt-gpt',
+			viewName: 'Chat',
+			pageTitle: 'feedox/chatgpt-plugins-playground',
+			desc: 'ChatGPT Playground',
+			// image: '/resources/imgs/main/main-link-preview-innovation.png',
+		}});
+
 	},
 	mounted() {
 		this.messages = this.cacheMgr._cache.get('messages');
