@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/781e6c88-32f4-45d2-add3-7d3757661a7a/deploy-status)](https://app.netlify.com/sites/alt-gpt/deploys)
+
 # Alt-GPT
 Multi-model and multi-vendor playground for developing ChatGPT plugins (and other LLMs) 
 
