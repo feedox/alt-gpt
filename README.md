@@ -1,4 +1,4 @@
-# chatgpt-plugins-playground
+# Alt-GPT
 Multi-model and multi-vendor playground for developing ChatGPT plugins (and other LLMs) 
 
 <img width="1164" alt="image" src="https://user-images.githubusercontent.com/246724/228085849-b3cdf285-3414-4f75-9e86-6620bb863d55.png">
@@ -32,5 +32,5 @@ Multi-model and multi-vendor playground for developing ChatGPT plugins (and othe
 Contributions welcome! Read the [contribution guidelines](CONTRIBUTING.md) first and submit a Pull Request after Fork this repository.
 
 ## Contact
-Please use GitHub [Issues](https://github.com/Feedox/chatgpt-plugins-playground/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) to contact us.
+Please use GitHub [Issues](https://github.com/Feedox/alt-gpt/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) to contact us.
 

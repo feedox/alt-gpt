@@ -17,7 +17,7 @@
 				.box-plugins.box-chat-column(flex-gt-xs="20") 
 					fieldset
 						legend Plugins
-						.terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/chatgpt-plugins-playground/issues/1" target="_blank">in progress</a>.
+						.terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
 						.box-plugins-list
 							.box-plugins-item(v-for="item in plugins") 
 								.layout-row.layout-start-center
@@ -156,7 +156,7 @@ export default {
 	},
 	created() {
 		helpers.updateMeta({...this.$app.layout.headers, ...{
-			appName: 'chatgpt-plugins-playground',
+			appName: 'alt-gpt',
 			viewName: 'Chat',
 			pageTitle: 'feedox/chatgpt-plugins-playground',
 			desc: 'ChatGPT Playground',
