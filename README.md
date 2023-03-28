@@ -1,7 +1,7 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/781e6c88-32f4-45d2-add3-7d3757661a7a/deploy-status)](https://app.netlify.com/sites/alt-gpt/deploys)
 
 # Alt-GPT
-Multi-model and multi-vendor playground for developing ChatGPT plugins (and other LLMs) 
+Multi-model and multi-vendor playground for developing ChatGPT plugins (for OAI and other LLMs) 
 
 <img width="1164" alt="image" src="https://user-images.githubusercontent.com/246724/228085849-b3cdf285-3414-4f75-9e86-6620bb863d55.png">
 
