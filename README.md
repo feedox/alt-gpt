@@ -3,7 +3,7 @@
 # Alt-GPT
 Multi-model and multi-vendor playground for developing ChatGPT plugins (for OAI and other LLMs) 
 
-<img width="1164" alt="image" src="https://user-images.githubusercontent.com/246724/228085849-b3cdf285-3414-4f75-9e86-6620bb863d55.png">
+<img width="1166" alt="image" src="https://user-images.githubusercontent.com/246724/228156015-62950718-9062-4de0-80ae-02e039980a00.png">
 
 ## Features:
 - 🌟 Plugins: Support AI plugins, discover and use public publics and develop locally your new plugin! 
@@ -15,6 +15,7 @@ Multi-model and multi-vendor playground for developing ChatGPT plugins (for OAI 
 1. Plugins support in Langchain is still experimental, buggy and slow
 1. Langchain doesn't support client-side processing, so api keys has to be sent and handled on a backend.
 1. Limited to a single plugin at a time.
+1. No support for auth-based plugins yet.
 
 ## Develop
 ### Setup
