@@ -29,6 +29,18 @@ Multi-model and multi-vendor playground for developing ChatGPT plugins (for OAI 
 1. Run `$ cd functions && yarn serve`
 2. Set in your browser devtools `localStorage.isLocal = true`, to let the FE request your local function.
 
+## How it works:
+<img width="750" alt="image" src="https://user-images.githubusercontent.com/246724/228149571-d2059e02-78d1-4724-8be8-8513feddbd2f.png">
+
+When using the playground without plugins selected, everything is client-side only, no communication other than with the LLM provider.
+When selecting a plugin, due to current limitation of Langchain, the communication is sent through BE, by default we've deployed a simple serverless function to GCP ([source here](/functions)). You can run your own local instance if your want to avoid this network travel.
+
+## Creating new API keys
+It is recommended to create a dedicated key so it could be revoked easily later.
+- **OpenAI**: Create new api key [here](https://platform.openai.com/account/api-keys)
+- [TBD]
+
+
 ## Contribute
 
 Contributions welcome! Read the [contribution guidelines](CONTRIBUTING.md) first and submit a Pull Request after Fork this repository.
