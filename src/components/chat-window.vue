@@ -205,7 +205,7 @@ export default {
 				this.messages.push(this.messages.pop()); // so it'll be stored properly in cache
 				// newText = newMsg.content;
 			} catch(err) {
-				let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error || err?.message);
+				let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error?.message || err?.message);
 
 				helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
 				this.isLoading = false; this.$forceUpdate();

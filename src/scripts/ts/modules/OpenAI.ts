@@ -33,7 +33,7 @@ export class OpenAI {
 		return response;
 	}
 
-	public async createChatCompletionStream(messages: IConvMessage[], config, priming?: string, onDelta?: (data)=>void, onProgress?: (wholeData)=>void) {
+	public async createChatCompletionStream(messages: IConvMessage[], config, priming?: string, onDelta?: (data) => void, onProgress?: (wholeData) => void) {
 		const p = libx.newPromise();
 		const url = `https://api.openai.com/v1/chat/completions`;
 		const apiKey = config.apikey;
@@ -46,7 +46,7 @@ export class OpenAI {
 				},
 				...messages
 			],
-			...{ 
+			...{
 				// defaults:
 				frequency_penalty: 0,
 				presence_penalty: 0,
@@ -73,23 +73,23 @@ export class OpenAI {
 				"stream": true,
 			}),
 		}) as SSE;
-	
+
 		let contents = '';
-	
+
 		eventSource.addEventListener('error', (event: any) => {
 			if (!contents) {
 				libx.log.e('error: ', event, contents)
-				p.reject(contents);
+				p.reject(JSON.parse(event.data));
 			}
 		});
-	
+
 		eventSource.addEventListener('message', async (event: any) => {
 			if (event.data === '[DONE]') {
 				libx.log.d('message: done: ', event, contents)
 				p.resolve(contents);
 				return;
 			}
-	
+
 			try {
 				const chunk = this.parseChunk(event.data);
 				if (chunk.choices && chunk.choices.length > 0) {
@@ -103,7 +103,7 @@ export class OpenAI {
 				p.reject(err);
 			}
 		});
-	
+
 		eventSource.stream();
 		return p;
 	}
@@ -114,15 +114,15 @@ export class OpenAI {
 		// 	content = content.trim();
 		// }
 		// const chunk = buffer.toString().replace('data: ', '').trim();
-		
+
 		if (libx.isEmptyString(chunk) || chunk === '[DONE]') {
 			return {
 				done: true,
 			};
 		}
-	
+
 		const parsed = JSON.parse(chunk);
-	
+
 		return {
 			id: parsed.id,
 			done: false,
@@ -132,4 +132,4 @@ export class OpenAI {
 	}
 }
 
-export class ModuleOptions {}
+export class ModuleOptions { }
