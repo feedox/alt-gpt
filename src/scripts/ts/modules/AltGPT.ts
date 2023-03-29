@@ -24,12 +24,16 @@ export class AltGPT {
 			});
 		} catch (e) {
 			libx.log.w('AltGPT: callAgent: ', e.response);
-			const z = JSON.parse(e.response);
 			try {
-				const w = JSON.parse(z.error?.config?.data);
-				return w.messages;
+				e = JSON.parse(e.response);
+				try {
+					const w = JSON.parse(e.error?.config?.data);
+					return w.messages;
+				} catch {
+					throw e?.error ?? e;
+				}
 			} catch {
-				throw z.error;
+				throw e;
 			}
 		}
 	}
