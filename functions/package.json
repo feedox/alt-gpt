@@ -14,12 +14,13 @@
     "serve": "nodemon --watch 'src/**/*.ts' --exec tsx --inspect -r dotenv/config src/index.ts",
     "functions:serve": "nodemon --watch 'build/**/*.js' --exec functions-framework --target=api",
     "functions:debug": "nodemon --watch 'build/**/*.js' --exec node --inspect node_modules/.bin/functions-framework --target=api",
-    "functions:deploy": "gcloud functions deploy altgpt-plugins --runtime=nodejs16 --trigger-http --entry-point=api --allow-unauthenticated"
+    "functions:deploy": "yarn build && gcloud functions deploy altgpt-plugins --runtime=nodejs16 --trigger-http --entry-point=api --allow-unauthenticated"
   },
   "dependencies": {
     "langchain": "^0.0.41",
     "libx.js": "^2.35.0",
-    "node-fetch": "^3.3.1"
+    "node-fetch": "^3.3.1",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "@google-cloud/functions-framework": "^3.1.3",
