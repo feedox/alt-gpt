@@ -9,20 +9,20 @@ Inspired by the paper of [Retrieval-Augmented Generation for Knowledge-Intensive
 <!-- <img width="1166" alt="image" src="https://user-images.githubusercontent.com/246724/228156015-62950718-9062-4de0-80ae-02e039980a00.png"> -->
 
 ## Features:
-- 🌟 Plugins: Support AI plugins, discover and use and combine plugins and develop locally your new ones! 
+- 🌟 Plugins: Support AI plugins, discover and use and combine plugins and your new ones locally! 
 - 🌟 No backend(!): All logic and network requests are on client-side, including usage of your API keys, no keys send to any server other than the LLM provider.
-- BYOK: Bring-your-own-key. Soon: Use API-keys from multiple vendors.
-- Local Persistance: Messages and settings are saved in locally on your device's LocalStorage
+- BYOK (Bring-your-own-key): Use your own keys, without 3rd party charges. Soon other LLMs will be supported.
+- Local Persistence: Messages and settings are saved locally on your device's LocalStorage
 
 ## Caveats:
 1. No support for auth-based plugins yet, though, you can specify in the prompt to use an API key in the HTTP request.
 
 ## How it works:
 ### Without plugins: 
-When performing completion without any plugins selected, your API key is used directly with the API, via HTTP request, of the relevant LLM vendor (OpenAI for example). No other backend services involved.
+When performing completion without any plugins selected, your API key is used directly with the API, via HTTP request, of the relevant LLM vendor (OpenAI for example). No other backend services are involved.
 
 ### With Plugins:
-When selecting one or more plugins, our IntentSDK attempts to classify the intention of the user to picks up one or more plugins and defines how each plugin will be used. Then we fetch the OpenAPI definition of the plugin and IntentSDK dynamically figures out how to use the plugin's API. Then it executes an HTTP call to the API's server, though, if the plugin is marked as CORS-protected (meaning the service owner did not allow HTTP calls from any website), we'll funnel the call through a simple proxy server to overcome this. You can start your own local instance of this proxy. Finally, all the information collection as an augmented context and a final prompt combining user's initial prompt + plugin's generated context and sending to LLM for final completion. The operation of plugin augmented retrieval might be chained if intended.
+When selecting one or more plugins, our IntentSDK attempts to classify the user's intention to pick up one or more plugins and defines how each plugin will be used. Then we fetch the plugin's OpenAPI definition and IntentSDK dynamically figures out how to use the plugin's API. Then it executes an HTTP call to the API's server, though, if the plugin is marked as CORS-protected (meaning the service owner did not allow HTTP calls from any website), we'll funnel the call through a simple proxy server to overcome this. You can start your own local instance of this proxy. Finally, all the information collected as an augmented context and a final prompt combining the user's initial prompt + plugin's generated context and sent to LLM for final completion. The operation of plugin augmented retrieval might be chained if intended.
 
 ### Flow:
 v0.1 (current):
