@@ -10,8 +10,8 @@ Inspired by the paper of [Retrieval-Augmented Generation for Knowledge-Intensive
 
 ## Features:
 - 🌟 Plugins: Support AI plugins, discover and use and combine plugins and develop locally your new ones! 
+- 🌟 No backend(!): All logic and network requests are on client-side, including usage of your API keys, no keys send to any server other than the LLM provider.
 - BYOK: Bring-your-own-key. Soon: Use API-keys from multiple vendors.
-- Privacy: All logic and network requests are on client-side, including usage of your API keys, no keys send to any server other than the LLM provider.
 - Local Persistance: Messages and settings are saved in locally on your device's LocalStorage
 
 ## Caveats:
