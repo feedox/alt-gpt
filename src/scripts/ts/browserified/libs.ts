@@ -6,3 +6,4 @@ import * as openai from 'openai';
 
 export { openai };
 
+export * as EventsStream from 'libx.js/build/modules/EventsStream.js';

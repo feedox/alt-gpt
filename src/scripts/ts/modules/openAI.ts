@@ -33,11 +33,60 @@ export class OpenAI {
 		return response;
 	}
 
+	public async createChatCompletion(messages: IConvMessage[], config, priming?: string) {
+		const p = libx.newPromise();
+		const url = `https://api.openai.com/v1/chat/completions`;
+		const apiKey = config.apikey;
+		const payload = {
+			"messages": [
+				{
+					role: 'system',
+					content: priming ?? `You are an assistant bot.`,
+				},
+				...messages
+			],
+			...{
+				// defaults:
+				frequency_penalty: 0,
+				presence_penalty: 0,
+				temperature: 0.8,
+				max_tokens: 256, // 512,
+				model: "gpt-3.5-turbo",
+				...config, // override
+				stream: false,
+				// user: 'userId',
+				top_p: 1.0,
+				n: 1,
+			}
+		};
+		delete payload.apikey;
+
+		const res: any = await fetch(url, {
+			method: "POST",
+			headers: {
+				'Accept': 'application/json, text/plain, */*',
+				'Authorization': `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				...payload,
+				"stream": false,
+			}),
+		});
+
+		const json = await res.json();
+
+		if (json.choices && json.choices.length > 0) {
+			return json.choices[0]?.message?.content || '';
+		}
+
+		return json ?? res;
+	}
+
 	public async createChatCompletionStream(messages: IConvMessage[], config, priming?: string, onDelta?: (data) => void, onProgress?: (wholeData) => void) {
 		const p = libx.newPromise();
 		const url = `https://api.openai.com/v1/chat/completions`;
 		const apiKey = config.apikey;
-		delete config.apikey;
 		const payload = {
 			"messages": [
 				{
@@ -60,6 +109,7 @@ export class OpenAI {
 				n: 1,
 			}
 		};
+		delete payload.apikey;
 
 		const eventSource = new SSE(url, {
 			method: "POST",

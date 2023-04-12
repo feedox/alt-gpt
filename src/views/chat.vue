@@ -17,7 +17,7 @@
 				.box-plugins.box-chat-column(flex-gt-xs="20") 
 					fieldset
 						legend Plugins
-						.terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
+						//- .terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
 						.box-plugins-list
 							.box-plugins-item(v-for="item in plugins") 
 								.layout-row.layout-start-center
@@ -28,7 +28,7 @@
 								.layout-row.layout-align-space-between-end
 									.box-plugins-item-desc {{ item.desc }}
 									//- input.box-plugins-item-checkbox(type="checkbox")
-									input.box-plugins-item-checkbox(type='checkbox', v-model='selectedPlugins', :value="item.id", :id='item.id', :true-value="[]", :disabled="selectedPlugins?.length > 0 && selectedPlugins[0] != item.id") 
+									input.box-plugins-item-checkbox(type='checkbox', v-model='selectedPlugins', :value="item.id", :id='item.id', :true-value="[]", :d-isabled="selectedPlugins?.length > 0 && selectedPlugins[0] != item.id") 
 
 								//- {{ item }}
 				.box-main.box-chat-column(flex) 
@@ -110,6 +110,7 @@ import { libx, ProxyCache } from '/frame/scripts/ts/browserified/frame.js';
 import { showdown } from '/scripts/ts/browserified/libs.js';
 import helpers from '/scripts/ts/app/app.helpers.js';
 import { IConvMessage } from '../scripts/ts/types/IConvMessage';
+import { AltGPT } from '/scripts/ts/modules/AltGPT.js';
 
 var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
 
@@ -137,20 +138,7 @@ export default {
 				'ai21:j2-grande-instruct',
 			],
 			showKeyWarning: true,
-			plugins: [
-				{ id:0, name: 'Wolfram', url: 'https://www.wolframalpha.com/.well-known/ai-plugin.json', desc: 'Access computation, math, curated knowledge & real-time data through Wolfram|Alpha and Wolfram Language', examplePrompt: 'How many calories are in Chickpea Salad?', icon: 'https://www.wolframcdn.com/images/icons/Wolfram.png', author: 'chatgpt-contact@wolframalpha.com' },
-				{ id:1, name: 'Wolfram Alpha', url: 'https://www.wolframcloud.com/.well-known/ai-plugin.json', desc: 'Dynamic computation and curated data from Wolfram Alpha', examplePrompt: '', icon: 'https://www.wolframcdn.com/images/icons/Wolfram.png', author: 'partner-program@wolfram.com' },
-				{ id:2, name: 'Klarna Shopping', url: 'https://www.klarna.com/.well-known/ai-plugin.json', desc: 'Search and compare prices from thousands of online shops', examplePrompt: 'what t shirts are available in klarna?', icon: 'https://www.klarna.com/assets/sites/5/2020/04/27143923/klarna-K-150x150.jpg', author: 'openai-products@klarna.com' },
-				{ id:3, name: 'Slack', url: 'https://slack.com/.well-known/ai-plugin.json', desc: 'Plugin for querying Slack', examplePrompt: '', icon: 'https://slack.com/img/slack_logo_mark.svg', author: '' },
-				{ id:4, name:'Zapier', url:'https://zapier.com/.well-known/ai-plugin.json', desc:'Interact with over 5,000+ apps like Google Sheets, Gmail, HubSpot, Salesforce, and thousands more.', examplePrompt:'', icon:'https://cdn.zappy.app/84fd584633b5b59cd8aceeda0baf81ca.png', author:'nla@zapier.com' },
-				{ id:5, "name":"PriceRunner","url":"https://www.pricerunner.se/.well-known/ai-plugin.json","desc":"This plugin lets users find relevant products when asking for any kind of shopping suggestions","examplePrompt":"","icon":"https://www.pricerunner.com/images/i/192x192/icon-dark-2020-1024x1024.png","author":"" },
-				{ id:6, name: 'Datasette', url: 'https://datasette.io/.well-known/ai-plugin.json', desc: 'Query datasette.io', examplePrompt: 'What are the most popular plugins?', icon: 'https://avatars.githubusercontent.com/u/126964132?s=400&u=08b2ed680144a4feb421308f09e5f3cc5876211a&v=4', author: 'Simon Willison' },
-				{ id:7, name: 'Shop', url: 'https://server.shop.app/.well-known/ai-plugin.json', desc: 'Search for millions of products from the world\'s greatest brands', examplePrompt: '', icon: 'https://cdn.shopify.com/shop-assets/static_uploads/shop-logo-white-bg-purple.png', author: 'help@shop.app' },
-				{ id:0, name: 'Speak', url: 'https://api.speak.com/.well-known/ai-plugin.json', desc: 'Learn how to say anything in another language with Speak, your AI-powered language tutor', examplePrompt: '', icon: 'https://api.speak.com/ai-plugin-logo.png', author: 'support@speak.com' },
-				{ id:0, name: 'Milo Family AI', url: 'https://www.joinmilo.com/.well-known/ai-plugin.json', desc: 'Curating the wisdom of village to give parents ideas that turn any 20 minutes from meh to magic', examplePrompt: '', icon: 'https://www.joinmilo.com/milo-blink.png', author: 'hello@joinmilo.com' },
-				// { id:0, name: '', url: '', desc: '', examplePrompt: '', icon: '', author: '' },
-
-			],
+			plugins: [],
 			selectedPlugins: [],
 		};
 	},
@@ -193,7 +181,7 @@ export default {
 		}});
 
 	},
-	mounted() {
+	async mounted() {
 		this.messages = this.cacheMgr._cache.get('messages');
 		if (this.messages?.length == null || this.messages?.length == 0) {
 			// this.$refs.bot.reset();
@@ -201,6 +189,11 @@ export default {
 				// { role: "assistant", content: "Hey, how can I help you today?", },
 			];
 		}
+
+		AltGPT.getPlugins().then(data=>{
+			this.plugins = data;
+			this.$forceUpdate();
+		});
 	},
 	methods: {
 		makeHtml(input) {

@@ -9,10 +9,21 @@ div
 
 	div.box-messages
 		.box-messages-item(v-for="(msg, i) of messages")
-			div(v-if="!renderHtml")
-				editable.box-messages-item-content(:class="msg.role == 'user' ? 'message-bot' : 'message-user'",contenteditable="true",v-model="msg.content") 
-			div(v-else)
-				.box-messages-item-content.output-html(:class="msg.role == 'user' ? 'message-bot' : 'message-user'", v-html="makeHtml(msg.content)")
+			.box-messages-item-content(:class="msg.role == 'user' ? 'message-bot' : 'message-user'")
+				div(v-if="msg.events").small.padding-left20
+					div(v-for="e of msg.events") 
+						//- div.ultra-small (( {{ e.payload.step }}-{{ e.payload.status }} -- {{e.payload.result}} ))&nbsp; 
+						span(v-if="e.payload.step=='intent' && e.payload.status=='start'") - Available actions: {{ e.payload?.availablePlugins }}
+						span(v-if="e.payload.step=='intent' && e.payload.status=='success'") - Matching actions:
+							div.padding-left10(v-if="e.payload.status=='success'", v-for="act of e.payload.result", :title="act.thought") - {{ act.action }} ({{ act.thought }})
+						span(v-if="e.payload.step=='get-plugin' && e.payload.status=='success'") - Using plugin: "{{ e.payload.result?.name }}" - {{ e.payload.result?.thought }}
+						span(v-if="e.payload.step=='operation' && e.payload.status=='success'", :title="e.payload.result?.url") - Executing: "{{ e.payload.result?.url }}
+						span(v-if="e.payload.step=='answer' && e.payload.status=='success'", :title="e.payload.result") - Got context, running completion: "{{ e.payload.result }}"...
+					br
+				span(v-if="!renderHtml")
+					editable(contenteditable="true",v-model="msg.content") 
+				span(v-else)
+					div.output-html(v-html="makeHtml(msg.content)")
 
 			.box-messages-item-hover.layout-column
 				.icon.btn-sqr.message-replay(label='replay from here', @click="replay(msg, i)", :disabled="isActive").pointer
@@ -53,9 +64,9 @@ div
 import { libx, ProxyCache } from '/frame/scripts/ts/browserified/frame.js';
 import { showdown, hotkeys } from '/scripts/ts/browserified/libs.js';
 import helpers from '/scripts/ts/app/app.helpers.js';
-import { OpenAI } from '/scripts/ts/modules/OpenAI.js';
+import { OpenAI } from '/scripts/ts/modules/openAI.js';
 import { IConvMessage } from '../scripts/ts/types/IConvMessage';
-import { AltGPT } from '/scripts/ts/modules/AltGPT.js';
+import { AltGPT } from '/scripts/ts/modules/altGPT.js';
 
 var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
 let cacheMgr = <ProxyCache>null;
@@ -81,6 +92,16 @@ export default {
 		if (this.messages?.length == null || this.messages?.length == 0) {
 			this.reset();
 		}
+
+		this.altGpt = new AltGPT(this.config.apikey),
+		this.altGpt.events.subscribe(e=>{
+			if (e == null) return;
+			console.log('altgpt-event: ', e);
+			const lastMsg = this.messages[this.messages.length-1];
+			if (lastMsg.events == null) lastMsg.events = [];
+			lastMsg.events.push(e);
+			this.$forceUpdate();
+		});
 
 		setTimeout(this.scrollChatToBottom, 3000);
 	},
@@ -118,7 +139,7 @@ export default {
 			relatedChunks: [],
 			isActive: false,
 			isNewModel: false,
-			altGpt: new AltGPT(),
+			altGpt: <AltGPT>null,
 		};
 	},
 	methods: {
@@ -142,29 +163,30 @@ export default {
 			
 			this.isLoading = true; this.$forceUpdate();
 			
-			if (this.selectedPlugins?.length > 0) {
-				try{
-					console.log('chat:submit: Selected plugins: ', this.selectedPlugins);
-					const plugin = this.selectedPlugins[0];
+			// if (this.selectedPlugins?.length > 0) {
+			// 	try{
+			// 		console.log('chat:submit: Selected plugins: ', this.selectedPlugins);
+			// 		const plugin = this.selectedPlugins[0];
 
-					const response = await this.altGpt.callAgent(plugin.url, this.userMessage, this.config.apikey, this.config);
-					const newUserMsg = <IConvMessage>{ role: 'user', content: msg };
-					this.messages.push(newUserMsg);
-					this.messages.push(<IConvMessage>{ role: 'assistant', content: response.result.output });
-				} catch(err) {
-					let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error || err?.message);
-	
-					helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
-					this.isLoading = false; this.$forceUpdate();
-					console.error(err);
-				}
-				this.isLoading = false;
+			// 		const response = await this.altGpt.performSmartCompletion(this.userMessage, this.selectedPlugins);
+			// 		// const response = await this.altGpt.callAgent(plugin.url, this.userMessage, this.config.apikey, this.config);
+			// 		const newUserMsg = <IConvMessage>{ role: 'user', content: msg };
+			// 		this.messages.push(newUserMsg);
+			// 		this.messages.push(<IConvMessage>{ role: 'assistant', content: response });
+			// 		this.userMessage = '';
+			// 	} catch(err) {
+			// 		let msg = err?.error?.message || err?.message;
+			// 		if (err.statusText) msg = `${err?.statusText} (${err?.statusCode})`;
 
-				return;
-			}
+			// 		helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
+			// 		this.isLoading = false; this.$forceUpdate();
+			// 		console.error(err);
+			// 	}
+			// 	this.isLoading = false;
 
-			let newResponse = null;
-			
+			// 	return;
+			// }
+
 			try{
 				const config = { 
 					frequency_penalty: this.bot?.frequency_penalty,
@@ -195,17 +217,26 @@ export default {
 				this.scrollChatToBottom();
 
 				const priming = this.config?.priming ?? this.bot?.priming;
-				newResponse = await this.openAI.createChatCompletionStream(messages, config, priming, (delta)=>{
+
+				const onDelta = (delta)=> {
 					this.isLoading = false;
 					newMsg.content += delta;
 					this.scrollChatToBottom(true);
-				});
+				};
+
+				if (this.selectedPlugins?.length > 0) {
+					await this.altGpt.performSmartCompletion(messages, this.selectedPlugins, config, onDelta, priming);
+				} else {
+					await this.openAI.createChatCompletionStream(messages, config, priming, onDelta);
+				}
+
 				this.$forceUpdate();
 				
 				this.messages.push(this.messages.pop()); // so it'll be stored properly in cache
 				// newText = newMsg.content;
 			} catch(err) {
-				let msg = err?.statusText ? `${err?.statusText} (${err?.statusCode})` : (err?.error?.message || err?.message);
+				let msg = err?.error?.message || err?.message;
+				if (err.statusText) msg = `${err?.statusText} (${err?.statusCode})`;
 
 				helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
 				this.isLoading = false; this.$forceUpdate();
@@ -274,10 +305,12 @@ export default {
 
 .box-messages { overflow-y: scroll; position: relative; border: 1px solid @borderColor; margin-bottom: 5px; padding: 1em; }
 .box-messages-item { margin-bottom:20px; position:relative; }
+.box-messages-item ul { margin:0; line-height: 12px; }
+.box-messages-item p { margin:0; display: inline; }
 .box-messages-item-content { background-color: #eee; padding:10px; white-space:break-spaces; }
 .box-messages-item-hover { display:none; }
 .box-messages-item:hover .box-messages-item-hover { display:inline-flex; }
-.message-bot { margin-left: 60px; text-align: right; }
+.message-bot { margin-left: 60px; text-align:left; }
 .message-user { margin-right: 60px; }
 .message-bot:before { content: '> '; }
 .message-user:before { content: '< '; }
