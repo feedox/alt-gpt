@@ -148,9 +148,11 @@ export default {
 			this.$emit('update:' + toggleName, !this[toggleName]);
 		},
 		reset() {
+			cacheMgr._cache.delete('messages')
 			this.messages = <IConvMessage[]>[
 				// { role: "assistant", content: "Hey, how can I help you today?", },
 			];
+
 			this.userMessage = this.config?.defaultInput ?? this.bot?.defaultInput;
 
 			if (this.selectedPlugins?.length > 0 && this.selectedPlugins[0].examplePrompt) {

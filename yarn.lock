@@ -5804,10 +5804,10 @@ fragment-cache@^0.2.1:
   dependencies:
     map-cache "^0.2.2"
 
-frame.libx.js@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/frame.libx.js/-/frame.libx.js-0.4.0.tgz#e05f95bab84f591fbf695e553cc835f4ecd70d20"
-  integrity sha512-S9I7Lw0fi+nf4XLPKD8BkfIlFa1gKOPJgvnglQtvfU4GTKXLSo4KROQN+vErvkDhhZTa3EyqPWgXPIHdlDq43w==
+frame.libx.js@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/frame.libx.js/-/frame.libx.js-0.4.1.tgz#512963a3731afe4f5f440076b5d564587b73d6f6"
+  integrity sha512-wN5q8A7KihJVcA5Byx2VCp7o4pm4Xi9z1U9Ja/+BOGe+87L68C0iwJ06UdI9ejgl0zDvXFVD2q3eKhdFYu8MqQ==
   dependencies:
     "@babel/plugin-proposal-decorators" "^7.19.3"
     "@babel/plugin-proposal-pipeline-operator" "^7.18.9"
@@ -5830,7 +5830,7 @@ frame.libx.js@^0.4.0:
     firebase-functions "^3.24.1"
     html2canvas "^1.4.1"
     is-plain-object "^5.0.0"
-    libx.js "^2.35.1"
+    libx.js "^2.35.2"
     lottie-web "^5.9.6"
     moment "^2.29.4"
     node-sass "^7.0.3"
@@ -8117,10 +8117,10 @@ libx.js@^2.34.3:
     xregexp "^5.0.2"
     yargs "^17.2.1"
 
-libx.js@^2.35.1:
-  version "2.35.1"
-  resolved "https://registry.yarnpkg.com/libx.js/-/libx.js-2.35.1.tgz#b57d06220f7f9b4a3c2bd545278896ee0b1af806"
-  integrity sha512-cSL0vbo/pUVVx2qpOJ7WNwC2BI9oB/xwy+hrxMkUgvd+AbLXWqacl5A9R4U+mthU+vg/TDAuivpwBfhBfklhlA==
+libx.js@^2.35.2:
+  version "2.35.2"
+  resolved "https://registry.yarnpkg.com/libx.js/-/libx.js-2.35.2.tgz#3ca9b30633f28400d7c56bb288073332fb3c40a2"
+  integrity sha512-qFwZVNe9nk4usKGprPn7vGUNuS7xa/dV/m5IV/bW10OHwkjDYiulyWtaPPIyFs8HuwD9XJkN5X1z7oIfp2qkDw==
   dependencies:
     axios "^0.21.3"
     concurrency.libx.js "^1.1.1"
