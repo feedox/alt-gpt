@@ -18,10 +18,12 @@
 
   "envs": {
     "prod": {
-      "env": "prod"
+      "env": "prod",
+      "apiUrl": "https://us-central1-feedox-1113.cloudfunctions.net"
     },
     "dev": {
       "env": "dev",
+      "apiUrl": "http://localhost:8080",
       "websiteUrl": "https://localhost:{{debugPort}}",
       "private": {
         "someSpecialValueForDev": 111

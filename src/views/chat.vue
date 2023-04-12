@@ -17,7 +17,7 @@
 				.box-plugins.box-chat-column(flex-gt-xs="20") 
 					fieldset
 						legend Plugins
-						.terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
+						//- .terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
 						.box-plugins-list
 							.box-plugins-item(v-for="item in plugins") 
 								.layout-row.layout-start-center
@@ -28,7 +28,7 @@
 								.layout-row.layout-align-space-between-end
 									.box-plugins-item-desc {{ item.desc }}
 									//- input.box-plugins-item-checkbox(type="checkbox")
-									input.box-plugins-item-checkbox(type='checkbox', v-model='selectedPlugins', :value="item.id", :id='item.id', :true-value="[]", :disabled="selectedPlugins?.length > 0 && selectedPlugins[0] != item.id") 
+									input.box-plugins-item-checkbox(type='checkbox', v-model='selectedPlugins', :value="item.id", :id='item.id', :true-value="[]", :d-isabled="selectedPlugins?.length > 0 && selectedPlugins[0] != item.id") 
 
 								//- {{ item }}
 				.box-main.box-chat-column(flex) 
@@ -110,6 +110,7 @@ import { libx, ProxyCache } from '/frame/scripts/ts/browserified/frame.js';
 import { showdown } from '/scripts/ts/browserified/libs.js';
 import helpers from '/scripts/ts/app/app.helpers.js';
 import { IConvMessage } from '../scripts/ts/types/IConvMessage';
+import { AltGPT } from '/scripts/ts/modules/AltGPT.js';
 
 var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
 
@@ -189,7 +190,7 @@ export default {
 			];
 		}
 
-		libx.browser.require(`/resources/chat/plugins.json`).then(data=>{
+		AltGPT.getPlugins().then(data=>{
 			this.plugins = data;
 			this.$forceUpdate();
 		});
