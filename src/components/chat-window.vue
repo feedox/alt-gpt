@@ -9,7 +9,7 @@ div
 
 	div.box-messages
 		.box-messages-item(v-for="(msg, i) of messages")
-			.box-messages-item-content(:class="msg.role == 'user' ? 'message-bot' : 'message-user'")
+			.box-messages-item-content(:class="msg.role == 'user' ? 'message-bot' : 'message-user'", v-if="msg")
 				div(v-if="msg.events").small.padding-left20
 					div(v-for="e of msg.events") 
 						//- div.ultra-small (( {{ e.payload.step }}-{{ e.payload.status }} -- {{e.payload.result}} ))&nbsp; 
@@ -114,6 +114,7 @@ export default {
 		docsIds: Array,
 		selectedPlugins: Array,
 		config: {},
+		pluginsSettings: {},
 		showInfo: Boolean,
 		showMore: {
 			type: Boolean,
@@ -225,7 +226,7 @@ export default {
 				};
 
 				if (this.selectedPlugins?.length > 0) {
-					await this.altGpt.performSmartCompletion(messages, this.selectedPlugins, config, onDelta, priming);
+					await this.altGpt.performSmartCompletion(messages, this.selectedPlugins, config, onDelta, priming, this.pluginsSettings);
 				} else {
 					await this.openAI.createChatCompletionStream(messages, config, priming, onDelta);
 				}

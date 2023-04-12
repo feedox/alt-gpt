@@ -19,12 +19,14 @@
 						legend Plugins
 						//- .terminal-alert.fg-white.bg-dark(v-if="selectedPlugins.length>0").small <b>Please note</b>: AI-plugins are currently server-side only, meaning your API key will be securely sent to Feedox's dedicated server without being recorded, tracked, or logged. Ensure you create a dedicated key for testing. Client-side plugin support is <a href="https://github.com/Feedox/alt-gpt/issues/1" target="_blank">in progress</a>.
 						.box-plugins-list
-							.box-plugins-item(v-for="item in plugins") 
+							.box-plugins-item(v-for="item in plugins").hover-container
 								.layout-row.layout-start-center
 									.box-plugins-item-icon
 										img.bg-img(:src="item.icon") 
 									.box-plugins-item-name.text-truncate(:title="item.name")
 										span {{ item.name }}
+										.box-plugins-item-configure
+											a(@click="configurePlugin(item)").hover.small configure
 								.layout-row.layout-align-space-between-end
 									.box-plugins-item-desc {{ item.desc }}
 									//- input.box-plugins-item-checkbox(type="checkbox")
@@ -35,7 +37,7 @@
 					fieldset
 						legend Chat
 
-						chat-window(:botId="botId", ref="bot", :config="config", :renderHtml.sync="renderHtml", :docsIds="docsSelected", :selected-plugins="onlySelectedPlugins")
+						chat-window(:botId="botId", ref="bot", :config="config", :renderHtml.sync="renderHtml", :docsIds="docsSelected", :selected-plugins="onlySelectedPlugins", :plugins-settings="settingsCache")
 
 				.box-config.box-chat-column(flex-gt-xs="20") 
 					fieldset
@@ -110,9 +112,11 @@ import { libx, ProxyCache } from '/frame/scripts/ts/browserified/frame.js';
 import { showdown } from '/scripts/ts/browserified/libs.js';
 import helpers from '/scripts/ts/app/app.helpers.js';
 import { IConvMessage } from '../scripts/ts/types/IConvMessage';
-import { AltGPT } from '/scripts/ts/modules/AltGPT.js';
+import { AltGPT } from '/scripts/ts/modules/altGPT.js';
 
 var conv = new showdown.Converter({tables: true, strikethrough: true, tasklists: true, emoji: true, openLinksInNewWindow: true });
+const settingsCacheMgr = new ProxyCache(`settings`, {});
+// (<any>window).s = settingsCacheMgr;
 
 export default {
 	data() {
@@ -121,6 +125,7 @@ export default {
 			docId: this.$route.query.docId,
 			isLoading: false,
 			cache: null,
+			settingsCache: null,
 			messages2: null,
 			messages: <IConvMessage[]>[],
 			bot: null,
@@ -157,6 +162,8 @@ export default {
 			max_tokens: 256,
 		}
 		this.cacheMgr = new ProxyCache(`ai-chat-${this.botId}`, defaultCache);
+		
+		this.settingsCache = settingsCacheMgr.proxy;
 
 		this.cache = this.cacheMgr.proxy;
 		if (Object.keys(this?.$route?.query ?? {}).contains('gpt4')) this.cache.model = this.models[1].split(':').pop();
@@ -196,6 +203,29 @@ export default {
 		});
 	},
 	methods: {
+		configurePlugin(plugin) {
+			const _this = this;
+			this.modal = this.$buefy.modal.open({
+				parent: this,
+				component: helpers.lazyLoader('/views/partials/plugin-config.vue.js'),
+				hasModalCard: true,
+				customClass: 'custom-class custom-class-2',
+				trapFocus: true,
+				props: {
+					obj: plugin,
+					settings: this.settingsCache,
+				},
+				events: {
+					close() {
+						_this.$forceUpdate();
+					},
+					submit(value) {
+						console.log('--- chat: plugin configure modal submitted')
+					},
+				},
+			});
+			console.log('modal: ', this.modal);
+		},
 		makeHtml(input) {
 			return conv.makeHtml(input);
 		},
@@ -225,7 +255,14 @@ export default {
 		},
 		selectedPlugins(val) {
 			this.cache.selectedPlugins = val;
-		}
+		},
+		// settingsCache: {
+		// 	handler(val) {
+		// 		console.log('-- settings changed', val);
+		// 	},
+		// 	deep: true,
+		// },
+
 		// docsSelected(val) {
 		// 	console.log('docsSelected changed' )
 		// 	this.cache.docsSelected = val;
@@ -284,7 +321,7 @@ button.liked { color:red; }
 		@media screen and (min-width: 600px){ /* xs */
 			height:660px;
 			max-width:710px;
-			// overflow-y: scroll;
+			overflow-y: scroll;
 		}
 	}
 }
@@ -300,6 +337,7 @@ button.liked { color:red; }
 	.box-plugins-item-name { .bold; }
 	.box-plugins-item-desc { font-size:14px; margin-top:5px; }
 	.box-plugins-item-icon { width:@pluginImgSize; height:@pluginImgSize; min-width:@pluginImgSize; max-width:@pluginImgSize; margin-right:10px; h-eight:60px; }
+	.box-plugins-item-configure { min-height: 22px; } 
 }
 
 </style>

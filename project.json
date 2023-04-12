@@ -16,6 +16,8 @@
   "compiledFolder": "./src/compile/",
   "compiledMainEntry": "main.js",
 
+  "apiUrlProd": "https://us-central1-feedox-1113.cloudfunctions.net/",
+
   "envs": {
     "prod": {
       "env": "prod",

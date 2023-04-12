@@ -13,6 +13,16 @@ interface IIntent {
 	action: string;
 	thought: string;
 }
+interface IPluginsSettingsMap {
+	[key: string]: IPluginsSettings;
+}
+interface IPluginsSettings {
+	authType: 'none' | 'bearer' | 'query';
+	corsProtected: Boolean;
+	authBearerToken: string;
+	authQueryName: string;
+	authQueryValue: string;
+}
 
 export class AltGPT {
 	public apiUrl = api.getApiPrefix();
@@ -97,8 +107,15 @@ export class AltGPT {
 		return res;
 	}
 
-	public async getOperation<T>(messages: IConvMessage[], thought: string, pluginDescriptor: string, apiDescriptor: string, priming?: string): Promise<IOperation<T>> {
+	public async getOperation<T>(messages: IConvMessage[], thought: string, pluginDescriptor: string, apiDescriptor: string, priming?: string, pluginSettings?: IPluginsSettings): Promise<IOperation<T>> {
 		const userQuery = messages[messages.length - 1].content;
+
+		let pSettings = '';
+		if (pluginSettings != null) {
+			pSettings = `authType:${pluginSettings.authType}`;
+			if (pluginSettings.authType == 'query') pSettings += `, query param: ${pluginSettings.authQueryName}, value: ${pluginSettings.authQueryValue}`;
+			if (pluginSettings.authType == 'bearer') pSettings += `, bearer token auth header: ${pluginSettings.authBearerToken}`;
+		}
 
 		const _messages = [...messages].map(x => {
 			const ret = { ...x };
@@ -110,11 +127,12 @@ export class AltGPT {
 			content: `
 			User query: \n"${userQuery}".
 			Plugin description: \n"${pluginDescriptor}".
+			Plugin settings: \n"${pSettings}",
 			Usage thought: \n"${thought}".
 			OpenAPI definition: \n"${apiDescriptor}".
-			Your objective: Your objective: As an assistant bot, your purpose is to help the machine comprehend human intentions based on user input and the available open-API definition file. Respond only with the URL, method, and parameters that best align with the user's query. Ensure that any placeholders are replaced with relevant data according to the given query, thought, and context. The outputted thought should be highly specific and explicit to best match the user's expectations. If there is only one endpoint available, select it.
-			Output with this format, avoid any other text: 
-			URL: <url with query>
+			Your objective: Your objective: As an assistant bot, your purpose is to help the machine comprehend human intentions based on user input and the available open-API definition file. Respond only with the URL, method, and parameters that best align with the user's query. Ensure that any placeholders are replaced with relevant data according to the given query, thought, and context. The outputted thought should be highly specific and explicit to best match the user's expectations. If there is only one endpoint available, select it. Make sure to incorporate the plugin settings into the output.
+			Output exactly with this format, avoid any other text as this will be parsed by a machine: 
+			URL: <url with query params, respecting plugin settings>
 			METHOD: <method (GET/POST/etc)>
 			BODY: <body in case of POST>`,
 			role: 'user',
@@ -185,7 +203,7 @@ export class AltGPT {
 		});
 	}
 
-	public async performSmartCompletion(messages: IConvMessage[], selectedPlugins: any[], config: any, onDelta: (data) => void, priming?: string) {
+	public async performSmartCompletion(messages: IConvMessage[], selectedPlugins: any[], config: any, onDelta: (data) => void, priming?: string, pluginsSettings?: IPluginsSettingsMap) {
 
 		// step 1 - find intent: 
 		this.events.emit({ step: 'intent', status: 'start', availablePlugins: selectedPlugins?.map(x => x.name).join(', ') }, 'smart-completion');
@@ -204,12 +222,13 @@ export class AltGPT {
 					libx.log.w('smartCompletion: Could not find plugin by name', intent);
 					continue;
 				}
+				const corsProtected = pluginsSettings[intent.action]?.corsProtected ?? plugin.corsProtected;
 				const apiDescriptorUrl = plugin.manifest?.api?.url;
-				const apiDescriptor = await this.getApiDescription(apiDescriptorUrl, plugin.cors);
+				const apiDescriptor = await this.getApiDescription(apiDescriptorUrl, corsProtected);
 				this.events.emit({ step: 'get-plugin', status: 'success', result: { name: plugin.name, url: apiDescriptorUrl }, }, 'smart-completion');
 
 				this.events.emit({ step: 'operation', status: 'start' }, 'smart-completion');
-				const operation = await this.getOperation(messages, intent.thought, plugin.manifest.description_for_model, apiDescriptor, priming);
+				const operation = await this.getOperation(messages, intent.thought, plugin.manifest.description_for_model, apiDescriptor, priming, pluginsSettings[intent.action]);
 				libx.log.v('smartCompletion: operation: ', operation);
 				this.events.emit({ step: 'operation', status: 'success', result: operation }, 'smart-completion');
 
@@ -222,7 +241,7 @@ export class AltGPT {
 				}
 
 				this.events.emit({ step: 'execute', status: 'start' }, 'smart-completion');
-				context = await this.executeOperation(operation, plugin.cors) + '\n';
+				context = await this.executeOperation(operation, corsProtected) + '\n';
 				if (context.length > this.options.maxLength) {
 					libx.log.w('smartCompletion: context is too big, removing from the end...', { context: context.length, max: this.options.maxLength });
 					context = context.substring(0, this.options.maxLength);

@@ -9,7 +9,7 @@
     "devUrlReplaceWith": "http://0.0.0.0:8081",
     "icon": "https://firebasestorage.googleapis.com/v0/b/feedox-1113.appspot.com/o/ai-plugins%2Fgoogle-feedox%2Flogo-google.png?alt=media&token=26b4a854-ad57-4ec3-b130-a7b8b93a8eee",
     "author": "contact@feedox.com",
-    "cors": false,
+    "corsProtected": false,
     "manifest": {
       "schema_version": "v1",
       "name_for_model": "GoogleSearcher",
@@ -37,7 +37,7 @@
     "examplePrompt": "what t shirts are available in klarna?",
     "icon": "https://www.klarna.com/assets/sites/5/2020/04/27143923/klarna-K-150x150.jpg",
     "author": "openai-products@klarna.com",
-    "cors": false,
+    "corsProtected": false,
     "manifest": {
       "schema_version": "v1",
       "name_for_model": "KlarnaProducts",
@@ -62,10 +62,10 @@
     "name": "Wolfram",
     "url": "https://www.wolframalpha.com/.well-known/ai-plugin.json",
     "desc": "Access computation, math, curated knowledge & real-time data through Wolfram|Alpha and Wolfram Language",
-    "examplePrompt": "How many calories are in Chickpea Salad?",
+    "examplePrompt": "How many calories in chickpea salted?",
     "icon": "https://www.wolframcdn.com/images/icons/Wolfram.png",
     "author": "chatgpt-contact@wolframalpha.com",
-    "cors": true,
+    "corsProtected": true,
     "manifest": {
       "schema_version": "v1",
       "name_for_model": "Wolfram",
@@ -97,7 +97,7 @@
     "examplePrompt": "",
     "icon": "https://www.wolframcdn.com/images/icons/Wolfram.png",
     "author": "partner-program@wolfram.com",
-    "cors": true,
+    "corsProtected": true,
     "manifest": {
       "schema_version": "v1",
       "name_for_model": "WolframAlpha",
@@ -214,7 +214,7 @@
     "examplePrompt": "",
     "icon": "https://cdn.shopify.com/shop-assets/static_uploads/shop-logo-white-bg-purple.png",
     "author": "help@shop.app",
-    "cors": true,
+    "corsProtected": true,
     "manifest": {
       "schema_version": "v1",
       "name_for_model": "Shop",
