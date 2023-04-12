@@ -282,7 +282,11 @@ export default {
 			if (this.selectedPlugins?.length > 0 && this.selectedPlugins[0].examplePrompt) {
 				this.userMessage = this.selectedPlugins[0].examplePrompt;
 			}
-		}
+		},
+		'config.apikey'(val) {
+			console.log('- apikey changed!')
+			this.altGpt.changeApikey(val);
+		},
 	},
 	computed: {
 		inputHeight() {

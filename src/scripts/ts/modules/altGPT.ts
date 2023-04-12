@@ -31,12 +31,12 @@ export class AltGPT {
 		user: app.userManager?.data?.public?.id,
 		model: 'gpt-3.5-turbo-0301',
 		// defaultInput: this.cache.defaultInput, 
-		apikey: this.apiKey,
+		apikey: this.apikey,
 		max_tokens: 256,
 		// ...this.config,
 	};
 
-	public constructor(private apiKey: string, public options?: Partial<ModuleOptions>) {
+	public constructor(private apikey: string, public options?: Partial<ModuleOptions>) {
 		libx.log.v('AltGPT:ctor: ');
 		this.options = { ...new ModuleOptions(), ...options };
 
@@ -48,8 +48,9 @@ export class AltGPT {
 		}
 	}
 
-	public test() {
-		this.events.emit({ a: 1 }, 'testtty');
+	public changeApikey(val) {
+		this.apikey = val;
+		this.basicConfig.apikey = val;
 	}
 
 	public async getIntents(messages: IConvMessage[], selectedPlugins: any[]) {
