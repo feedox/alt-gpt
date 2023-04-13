@@ -113,9 +113,9 @@ export class AltGPT {
 
 		let pSettings = '';
 		if (pluginSettings != null) {
-			pSettings = `authType:${pluginSettings.authType}`;
-			if (pluginSettings.authType == 'query') pSettings += `, query param: ${pluginSettings.authQueryName}, value: ${pluginSettings.authQueryValue}`;
-			if (pluginSettings.authType == 'bearer') pSettings += `, bearer token auth header: ${pluginSettings.authBearerToken}`;
+			pSettings = `authType: ${pluginSettings.authType}`;
+			if (pluginSettings.authType == 'query') pSettings += `. add to query: ${pluginSettings.authQueryName}=${pluginSettings.authQueryValue}`;
+			if (pluginSettings.authType == 'bearer') pSettings += `. bearer token auth header: ${pluginSettings.authBearerToken}`;
 		}
 
 		const _messages = [...messages].map(x => {
