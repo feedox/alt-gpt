@@ -4,7 +4,7 @@
 Multi-model and multi-vendor playground for developing ChatGPT plugins (for OAI and other LLMs).  
 Inspired by the paper of [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401).
 
-![alt-gpt-demo](https://user-images.githubusercontent.com/246724/231473145-2ead9902-fc46-4de4-b71e-a0021a6e973c.gif)
+![alt-gpt-demo-2-720](https://user-images.githubusercontent.com/246724/231617410-2cb4eef2-45a1-4e94-9ce8-8fcf51cc81c6.gif)
 
 <!-- <img width="1166" alt="image" src="https://user-images.githubusercontent.com/246724/228156015-62950718-9062-4de0-80ae-02e039980a00.png"> -->
 
