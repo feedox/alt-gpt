@@ -78,12 +78,13 @@ export class AltGPT {
 			User query: "${userQuery}"
 			Your objective: As an assistant bot is to help the machine comprehend human intentions based on user input and available tools. Your goal is to identify the best action to directly address the user's inquiry. In your subsequent steps, you will utilize the chosen action. You may select multiple actions and list them in a meaningful order. Prioritize actions that directly relate to the user's query over general ones. Ensure that the generated thought is highly specific and explicit to best match the user's expectations. Construct the result in a manner that an online open-API would most likely expect. You can repeat and chain actions, even if they are the same, one after the another.
 
-			Answer in this format, list of selected actions:
-			<action name, single word>: <your thought as a bot about how to use this action in your next steps (use verbs as: search, query, calculate, store, etc.), concisely up to 10 words>.
+			Output exactly with this format, avoid any other text as this will be parsed by a machine: 
+			<action name, single word>: <your thought as a bot about how to use this action in your next steps (use verbs as: search, query, calculate, store, etc.), concisely up to 10 words, use only data extraction without any calculations>.
 
 			Available Actions: 
 			N/A: no suitable action, just perform simple GPT completion.
-			 - ${actions.join('\n - ')}
+			 - ${actions.join('\n - ')}.
+
 			`,
 			role: 'user',
 		});
@@ -130,11 +131,13 @@ export class AltGPT {
 			Plugin settings: \n"${pSettings}",
 			Usage thought: \n"${thought}".
 			OpenAPI definition: \n"${apiDescriptor}".
-			Your objective: Your objective: As an assistant bot, your purpose is to help the machine comprehend human intentions based on user input and the available open-API definition file. Respond only with the URL, method, and parameters that best align with the user's query. Ensure that any placeholders are replaced with relevant data according to the given query, thought, and context. The outputted thought should be highly specific and explicit to best match the user's expectations. If there is only one endpoint available, select it. Make sure to incorporate the plugin settings into the output.
+			Your objective: As an assistant bot, your purpose is to help the machine comprehend human intentions based on user input and the available open-API definition file. Respond only with the URL, method, and parameters that best align with the user's query. Ensure that any placeholders are replaced with relevant data according to the given query, thought, and context. The outputted thought should be highly specific and explicit to best match the user's expectations. If there is only one endpoint available, select it. Make sure to incorporate the plugin settings into the output.
+			
 			Output exactly with this format, avoid any other text as this will be parsed by a machine: 
-			URL: <url with query params, respecting plugin settings>
+			URL: <url + parameters, respecting plugin settings>
 			METHOD: <method (GET/POST/etc)>
-			BODY: <body in case of POST>`,
+			BODY: <body in case of POST>
+			[END]`,
 			role: 'user',
 		});
 		const _priming = `You are an assistant bot designed to extract and generate suitable actions based on the given text. Treat the provided objective as your goal and adhere to the instructions. To assist you in connecting to the internet, we have included excerpts from the web, which you can utilize to respond to user inquiries. ${priming}`;
@@ -167,7 +170,7 @@ export class AltGPT {
 			`,
 			role: 'user',
 		});
-		const _priming = `You are a bot designed to assist machines in answering user inquiries based solely on the given context. If relevant to user's inquiry, extract full links from the context and maintain them unchanged. If there are multiple outcomes, present them as bullet points, each accompanied by the pertinent link. If the supplied context is empty or yields no results, state that the search produced no findings and recommend refining the query. If the answer is not included, respond with 'Hmm, I'm not sure...'. Render links as Markdown links. ${priming}`;
+		const _priming = `You are a bot designed to assist machines in answering user inquiries based solely on the given context. If relevant to user's inquiry, extract full links from the context and maintain them unchanged. If there are multiple outcomes, present them as bullet points, each accompanied by the pertinent link. If the supplied context is empty or yields no results, state that the search produced no findings and recommend refining the query. If the answer is not included, respond with 'Hmm, I'm not sure...'. ${priming}`;
 		const _config = { ...this.basicConfig, ...config };
 		const res = await this.openAI.createChatCompletionStream(_messages, _config, _priming, onDelta);
 
@@ -175,7 +178,7 @@ export class AltGPT {
 	}
 
 	public getAvailableActions(selectedPlugins: any[]) {
-		return selectedPlugins.map(p => `${p.manifest.name_for_model}: ${p.manifest.description_for_model}`);
+		return selectedPlugins.map(p => `${p.manifest.name_for_model}: "${p.manifest.description_for_model}"`);
 	}
 
 	public getPluginByName(name: string, selectedPlugins: any[]) {
