@@ -47,7 +47,7 @@ It is recommended to create a dedicated key so it could be revoked easily later.
 1. Run `$ yarn install`
 
 ### Start web:
-1. Run `$ yarn watch`
+1. Run `$ yarn start`
 2. Open browser on `http://0.0.0.0:3010/`
 
 ### Optional: Start plugin-executer service:
