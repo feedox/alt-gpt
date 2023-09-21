@@ -295,9 +295,9 @@ export class OpenAI {
 
 		const setupPayloadForAI21 = () => {
 			return {
-				prompt: messages.map((message) => message.content).join("\n"),
+				// prompt: messages.map((message) => message.content).join("\n"),
+				prompt: messages.length > 0 ? messages[messages.length - 1].content : "",
 				model_type: config.model_type || "mid", // or 'light' or 'ultra' based on your choice
-
 				maxTokens: 256,
 				...config,
 			};
