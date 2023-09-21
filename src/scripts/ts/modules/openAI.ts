@@ -171,52 +171,43 @@ export class OpenAI {
 		const eventSource = new SSE(url, {
 			method: "POST",
 			headers: headers,
-			payload: JSON.stringify(payload),
+			payload: JSON.stringify({
+				...payload,
+				stream: true,
+			}),
 		}) as SSE;
 
 		let contents = "";
 
 		eventSource.addEventListener("error", (event: any) => {
 			if (!contents) {
+				libx.log.e("error: ", event, contents);
 				p.reject(event.data && JSON.parse(event.data));
 			}
 		});
 
+
 		eventSource.addEventListener("message", async (event: any) => {
+			if (event?.data === "[DONE]") {
+				// Handle this special case, maybe close the event source or do some other logic
+				libx.log.d("message: done: ", event, contents);
+				p.resolve(contents);
+				// eventSource.close();
+				return;
+			}
 			try {
-				console.log("🚀 ~ event data:", event?.data);
-
-				if (event?.data === "[DONE]") {
-					// Handle this special case, maybe close the event source or do some other logic
-					eventSource.close();
-					return;
+				const chunk = this.parseChunk(event.data);
+				if (chunk.choices && chunk.choices.length > 0) {
+					const newData = getNewData(chunk);
+					contents += newData;
+					if (onDelta) onDelta(newData);
+					if (onProgress) onProgress(contents);
 				}
-
-				if (!isValidJSON(event?.data)) {
-					console.error("Invalid JSON received:", event?.data);
-					return;
-				}
-
-				const chunk = JSON.parse(event?.data);
-				const newData = getNewData(chunk);
-				contents += newData;
-
-				if (onDelta) onDelta(newData);
-				if (onProgress) onProgress(contents);
 			} catch (err) {
+				console.error(err);
 				p.reject(err);
 			}
 		});
-
-		function isValidJSON(jsonString) {
-			try {
-				JSON.parse(jsonString);
-				return true;
-			} catch (err) {
-				return false;
-			}
-		}
-
 		eventSource.stream();
 
 		return p;
@@ -315,10 +306,6 @@ export class OpenAI {
 		/////////// handle responses
 		const handleGPTResponse = (chunk) => {
 			if (chunk.choices && chunk.choices.length > 0) {
-				console.log(
-					"🚀 ~ file: openAI.ts:404 ~ OpenAI ~ handleGPTResponse ~ chunk.choices[0]?.delta?.content:",
-					chunk.choices[0]?.delta?.content
-				);
 				return chunk.choices[0]?.delta?.content || "";
 			}
 			return "";
