@@ -83,81 +83,6 @@ export class OpenAI {
 		return json ?? res;
 	}
 
-	// public async createChatCompletionStream(messages: IConvMessage[], config, priming?: string, onDelta?: (data) => void, onProgress?: (wholeData) => void) {
-	// 	const p = libx.newPromise();
-	// 	const url = `https://api.openai.com/v1/chat/completions`;
-	// 	const apiKey = config.apikey;
-	// 	const payload = {
-	// 		"messages": [
-	// 			{
-	// 				role: 'system',
-	// 				content: priming ?? `You are an assistant bot.`,
-	// 			},
-	// 			...messages
-	// 		],
-	// 		...{
-	// 			// defaults:
-	// 			frequency_penalty: 0,
-	// 			presence_penalty: 0,
-	// 			temperature: 0.8,
-	// 			max_tokens: 256, // 512,
-	// 			model: "gpt-3.5-turbo",
-	// 			...config, // override
-	// 			stream: true,
-	// 			// user: 'userId',
-	// 			top_p: 1.0,
-	// 			n: 1,
-	// 		}
-	// 	};
-	// 	delete payload.apikey;
-
-	// 	const eventSource = new SSE(url, {
-	// 		method: "POST",
-	// 		headers: {
-	// 			'Accept': 'application/json, text/plain, */*',
-	// 			'Authorization': `Bearer ${apiKey}`,
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		payload: JSON.stringify({
-	// 			...payload,
-	// 			"stream": true,
-	// 		}),
-	// 	}) as SSE;
-
-	// 	let contents = '';
-
-	// 	eventSource.addEventListener('error', (event: any) => {
-	// 		if (!contents) {
-	// 			libx.log.e('error: ', event, contents)
-	// 			p.reject(JSON.parse(event.data));
-	// 		}
-	// 	});
-
-	// 	eventSource.addEventListener('message', async (event: any) => {
-	// 		if (event.data === '[DONE]') {
-	// 			libx.log.d('message: done: ', event, contents)
-	// 			p.resolve(contents);
-	// 			return;
-	// 		}
-
-	// 		try {
-	// 			const chunk = this.parseChunk(event.data);
-	// 			if (chunk.choices && chunk.choices.length > 0) {
-	// 				const newData = chunk.choices[0]?.delta?.content || '';
-	// 				contents += newData;
-	// 				if (onDelta) onDelta(newData);
-	// 				if (onProgress) onProgress(contents);
-	// 			}
-	// 		} catch (err) {
-	// 			console.error(err);
-	// 			p.reject(err);
-	// 		}
-	// 	});
-
-	// 	eventSource.stream();
-	// 	return p;
-	// }
-
 
 	public async createChatCompletionStream({
 		url,
@@ -181,8 +106,15 @@ export class OpenAI {
 
 		eventSource.addEventListener("error", (event: any) => {
 			if (!contents) {
+				let errorMessage;
+				try {
+					errorMessage = JSON.parse(event.data);
+				} catch (e) {
+					errorMessage = event.data;
+				}
+
 				libx.log.e("error: ", event, contents);
-				p.reject(event.data && JSON.parse(event.data));
+				p.reject(errorMessage);
 			}
 		});
 
@@ -192,13 +124,11 @@ export class OpenAI {
 				// Handle this special case, maybe close the event source or do some other logic
 				libx.log.d("message: done: ", event, contents);
 				p.resolve(contents);
-				// eventSource.close();
 				return;
 			}
 			try {
-				const chunk = this.parseChunk(event.data);
-				if (chunk.choices && chunk.choices.length > 0) {
-					const newData = getNewData(chunk);
+				const newData = getNewData(event.data);
+				if (newData) {
 					contents += newData;
 					if (onDelta) onDelta(newData);
 					if (onProgress) onProgress(contents);
@@ -230,7 +160,7 @@ export class OpenAI {
 		}
 		let httpResponse = await response.json();
 		let res = getNewData(httpResponse);
-		return onDelta(res); // Assuming httpResponse has a 'content' field
+		return onDelta(res);
 	}
 
 	public async createChatCompletionRes(
@@ -242,8 +172,7 @@ export class OpenAI {
 	) {
 		const p = libx.newPromise();
 
-		//// payload
-
+		//// payloads
 		const setupPayloadForGPT = () => {
 			return {
 				messages: [
@@ -282,9 +211,8 @@ export class OpenAI {
 		};
 
 		const setupPayloadForAnthropic = () => {
-			const promptContent = `\n\nHuman: ${messages
-				.map((message) => message.content)
-				.join("\n\nHuman: ")}\n\nAssistant:`;
+			const promptContent = `\n\nHuman: ${messages.length > 0 ? messages[messages.length - 1].content : ""
+				}\n\nAssistant:`;
 			return {
 				prompt: promptContent,
 				model: "claude-2", // or "claude-instant-1"
@@ -295,39 +223,49 @@ export class OpenAI {
 
 		const setupPayloadForAI21 = () => {
 			return {
-				// prompt: messages.map((message) => message.content).join("\n"),
-				prompt: messages.length > 0 ? messages[messages.length - 1].content : "",
+				prompt:
+					messages.length > 0 ? messages[messages.length - 1].content : "",
 				model_type: config.model_type || "mid", // or 'light' or 'ultra' based on your choice
 				maxTokens: 256,
 				...config,
 			};
 		};
 
-		/////////// handle responses
-		const handleGPTResponse = (chunk) => {
-			if (chunk.choices && chunk.choices.length > 0) {
-				return chunk.choices[0]?.delta?.content || "";
+		//// handle responses
+		const handleGPTResponse = (data) => {
+			try {
+				const chunk = JSON.parse(data);
+				if (chunk.choices && chunk.choices.length > 0) {
+					return chunk.choices[0]?.delta?.content || "";
+				}
+			} catch (err) {
+				console.error("Error parsing GPT response", err);
 			}
 			return "";
 		};
 
 		const handleCohereResponse = (chunk) => {
-			// For simplicity, I'm assuming you only request one generation.
-			// If you request multiple generations (using num_generations parameter > 1),
-			// you may want to handle all the returned texts appropriately.
 			if (chunk.generations && chunk.generations.length > 0) {
 				return chunk.generations[0].text;
 			}
 			throw new Error("No completion found in Cohere response.");
 		};
-		const handleAnthropicResponse = (chunk) => {
-			return chunk.completion;
+
+		const handleAnthropicResponse = (data) => {
+			try {
+				const chunk = JSON.parse(data);
+				return chunk.completion || "";
+			} catch (err) {
+				console.error("Error parsing Anthropics response", err);
+				return "";
+			}
 		};
 
 		const handleAI21Response = (httpResponse) => {
 			return httpResponse?.completions[0]?.data?.text;
 		};
 
+		//get model type
 		const getModelType = (model) => {
 			if (model.includes("gpt") || model.includes("davinci")) {
 				return "gpt";
@@ -349,6 +287,7 @@ export class OpenAI {
 			"Content-Type": "application/json",
 		};
 		let useSSE = false;
+
 		switch (modelType) {
 			case "gpt":
 				url = `https://api.openai.com/v1/chat/completions`;
@@ -364,11 +303,13 @@ export class OpenAI {
 				headers["Authorization"] = `Bearer ${config.apikey}`;
 				break;
 			case "anthropic":
-				url = `https://api.anthropic.com/v1/complete`;
+				// url = `https://api.anthropic.com/v1/complete`;
+				url = `http://localhost:3001/api`;
 				payload = setupPayloadForAnthropic();
 				getNewData = (data) => handleAnthropicResponse(data);
 				headers["x-api-key"] = config.apikey;
 				headers["anthropic-version"] = "2023-06-01";
+				useSSE = true;
 				break;
 			case "ai21":
 				url = `https://api.ai21.com/studio/v1/j2-${config.model_type || "mid"
