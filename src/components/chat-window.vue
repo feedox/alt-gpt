@@ -231,12 +231,12 @@ export default {
 					await this.altGpt.performSmartCompletion(messages, this.selectedPlugins, config, onDelta, priming, this.pluginsSettings);
 				} else {
 					// await this.openAI.createChatCompletionStream(messages, config, priming, onDelta);
-          const httpResponse = await this.openAI.createChatCompletionRes(
-            messages,
-            config,
-            priming,
-            onDelta
-          );
+					await this.openAI.createChatCompletionRes(
+						messages,
+						config,
+						priming,
+						onDelta
+					);
 				}
 
 				this.$forceUpdate();
