@@ -118,12 +118,19 @@ export class OpenAI {
     });
 
     eventSource.addEventListener("message", async (event: any) => {
+      console.log("🚀 ~ file: openAI.ts:140 ~ OpenAI ~ eventSource.addEventListener ~ event:", event);
       if (event?.data === "[DONE]") {
         // Handle this special case, maybe close the event source or do some other logic
         libx.log.d("message: done: ", event, contents);
         p.resolve(contents);
         return;
       }
+
+      if (!event.data || event.data.trim() === "") {
+        console.log("Received empty or invalid data.");
+        return; // Skip processing for empty data
+      }
+
       try {
         const newData = getNewData(event.data);
         if (newData) {
@@ -136,6 +143,7 @@ export class OpenAI {
         p.reject(err);
       }
     });
+
     eventSource.stream();
 
     return p;
@@ -230,17 +238,25 @@ export class OpenAI {
     };
 
     const setupPayloadForAnthropic = (model) => {
-      const promptContent = `\n\nHuman: ${messages.length > 0 ? messages[messages.length - 1].content : ""
+      const systemPrompt = `\n\nHuman: ${messages.length > 0 ? messages[messages.length - 1].content : ""
         }\n\nAssistant:`;
-      return {
-        prompt: promptContent,
-        model,
-        max_tokens_to_sample: 300,
+      const newConfig = {
+        provider: "anthropic",
+        model: model,
+        maxTokens: 300,
         stream: true,
-        ...config,
+        frequencyPenalty: config.frequencyPenalty || 0,
+        presencePenalty: config.presencePenalty || 0,
+        temperature: config.temperature || 0.8,
+      };
+
+      return {
+        systemPrompt,
+        config: newConfig,
+        stream: true,
+
       };
     };
-
     const setupPayloadForAI21 = (model) => {
       return {
         prompt:
@@ -320,7 +336,8 @@ export class OpenAI {
         break;
       case "claude-instant-v1.0":
         // url = `https://api.anthropic.com/v1/complete`;
-        url = `http://localhost:3001/api`;
+        // url = `http://localhost:3001/api`;
+        url = `https://ws-edge-v2.feedox.workers.dev/completion/650fb33a815c45d4191a1e094628ec7d/`
         payload = setupPayloadForAnthropic(config.model);
         getNewData = (data) => handleAnthropicResponse(data);
         headers["x-api-key"] = config.apikey;
