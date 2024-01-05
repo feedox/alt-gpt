@@ -163,9 +163,9 @@ export default {
 			if (this.isActive) return;
 			const msg = this.userMessage;
 			console.log('submit: ', msg);
-			
+
 			this.isLoading = true; this.$forceUpdate();
-			
+
 			// if (this.selectedPlugins?.length > 0) {
 			// 	try{
 			// 		console.log('chat:submit: Selected plugins: ', this.selectedPlugins);
@@ -191,7 +191,7 @@ export default {
 			// }
 
 			try{
-				const config = { 
+				const config = {
 					frequency_penalty: this.bot?.frequency_penalty,
 					presence_penalty: this.bot?.presence_penalty,
 					temperature: this.bot?.temperature,
@@ -214,7 +214,7 @@ export default {
 					this.userMessage = '';
 					this.messages.push(newUserMsg)
 				}
-				
+
 				const newMsg = {role:'assistant', content: ''};
 				this.messages.push(newMsg);
 				this.scrollChatToBottom();
@@ -230,15 +230,21 @@ export default {
 				if (this.selectedPlugins?.length > 0) {
 					await this.altGpt.performSmartCompletion(messages, this.selectedPlugins, config, onDelta, priming, this.pluginsSettings);
 				} else {
-					await this.openAI.createChatCompletionStream(messages, config, priming, onDelta);
+					// await this.openAI.createChatCompletionStream(messages, config, priming, onDelta);
+					await this.openAI.createChatCompletionRes(
+						messages,
+						config,
+						priming,
+						onDelta
+					);
 				}
 
 				this.$forceUpdate();
-				
+
 				this.messages.push(this.messages.pop()); // so it'll be stored properly in cache
 				// newText = newMsg.content;
 			} catch(err) {
-				let msg = err?.error?.message || err?.message;
+				let msg = err?.error?.message || err?.message || err;
 				if (err.statusText) msg = `${err?.statusText} (${err?.statusCode})`;
 
 				helpers.toast(`Failed to process request: ${msg || ''}`, 'is-danger', 'is-top');
@@ -334,5 +340,4 @@ export default {
 	p { margin-top:0; margin-bottom:0; }
 	img { min-width:40px; min-height:40px; border: 1px solid #999; background-color:#555 ; }
 }
-
 </style>

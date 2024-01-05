@@ -172,8 +172,7 @@ export class AltGPT {
 		});
 		const _priming = `You are a bot designed to assist machines in answering user inquiries based solely on the given context. If relevant to user's inquiry, extract full links from the context and maintain them unchanged. If there are multiple outcomes, present them as bullet points, each accompanied by the pertinent link. If the supplied context is empty or yields no results, state that the search produced no findings and recommend refining the query. If the answer is not included, respond with 'Hmm, I'm not sure...'. ${priming}`;
 		const _config = { ...this.basicConfig, ...config };
-		const res = await this.openAI.createChatCompletionStream(_messages, _config, _priming, onDelta);
-
+		const res = await this.openAI.createChatCompletionRes(_messages, _config, _priming, onDelta);
 		return res;
 	}
 
